@@ -55,49 +55,33 @@ client.on('message', function (channel, tags, message, self) {
         args[2] === 'time') ||
         command === 'test') {
         const listMsg = message.replace(/.*]/, '')
-        const listArr = listMsg.split(' ⏩ ')
-        const timeArr = listArr.map(e => e.match(/(?<=\()\d?\d:\d{2}(?=\))/)
-            ?.toString()
-            ?.split(':'))
-            .filter(e => e)
-        const dateArr = timeArr.map(e => {
-            const [h, m] = e
-            const date = new Date()
+        const arr = listMsg.split(' ⏩ ')
+        const a = arr.map(e => e.split(/(?=\(\d\d?:\d{2}\))/))
+        const b = a.map(e => {
+            const time = e[1].slice(1, -1)
+            const title = e[0].trim()
+            return { title, time }
+        })
+        const dayInMs = 24 * 60 * 60 * 1000
+        const d = new Date()
+        const c = b.map((e, i) => {
+            const { title, time } = e
+            const [h, m] = time.split(':')
+            const date = new Date(d.getTime())
             date.setHours(h)
             date.setMinutes(m)
-            if (date.getTime() < Date.now())
-                date.setTime(date.getTime() + 24 * 60 * 60 * 1000)
-            return date
+            const t = date.getTime()
+            const tBase = d.getTime()
+            if (i === 0) {
+                d.setTime(t)
+            } else if (t < tBase) {
+                d.setTime(t + dayInMs)
+                date.setTime(t + dayInMs)
+            }
+            return { title, date }
         })
-        let sliceIndex = 0
-        dateArr.forEach((e, i, a) => {
-            if (i === 0 || sliceIndex)
-                return
-            if (a[i - 1].getTime() > e.getTime())
-                sliceIndex = i - 1
-        })
-        const a = dateArr.slice(0, sliceIndex)
-            .map(e => {
-                e.setTime(e.getTime() - 24 * 60 * 60 * 1000)
-                return e
-            })
-            .concat(dateArr.slice(sliceIndex))
-        let fIndex = 0
-        // a.forEach((e, i, a) => {
-        //     if (i === 0 || fIndex)
-        //         return
-        //     if (Date.now() > e.getTime())
-        //         fIndex = i - 1
-        // })
-        const dateObjArr = dateArr.slice(fIndex)
-        const titleObjArr = listArr.slice(fIndex)
-            .map(e => e.replace(/\(\d?\d:\d{2}\).*/, '').trim())
-        const dataArr = dateObjArr.map((date, i) => ({
-            date,
-            title: titleObjArr[i]
-        }))
-        _data = dataArr
-        fs.writeFileSync('./data/_data.json', JSON.stringify(dataArr, null, 4))
+        _data = c
+        fs.writeFileSync('./data/_data.json', JSON.stringify(c, null, 4))
     }
     if (command === 'next') {
         updateData()

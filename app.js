@@ -17,15 +17,9 @@ client.connect();
 const double0 = str => ('0' + str).slice(-2)
 
 const updateData = () => {
-    let fIndex
-    _data.forEach((e, i, a) => {
-        if (i === 0 || fIndex !== undefined)
-            return
-        if (Date.now() > e.date.getTime())
-            fIndex = i - 1
-    })
-    // if (!fIndex)
-    //     fIndex = _data.length - 1
+    let fIndex = _data.findIndex(e => e.date.getTime() > Date.now()) - 1
+    if (fIndex < 0)
+        fIndex = 0
     _data = _data.slice(fIndex)
 }
 
@@ -38,7 +32,7 @@ try {
     const data = JSON.parse(fs.readFileSync('./data/_data.json'))
     _data = data.map(e => ({ ...e, date: new Date(e.date) }))
 
-} catch (error) { console.log(error) }
+} catch (error) { console.error(error) }
 
 client.on('message', function (channel, tags, message, self) {
     if (self || !message.startsWith('!')) return;
@@ -95,9 +89,14 @@ client.on('message', function (channel, tags, message, self) {
         const h = Math.floor(calcDate / 1000 / 60 / 60)
         const m = Math.floor(calcDate / 1000 / 60) % 60
         const s = Math.floor(calcDate / 1000) % 60
-        const mStr = double0(m)
-        const sStr = double0(s)
-        client.say(channel, `@${tags.username}, Next: ${title} in ${h}h${mStr}m${sStr}s`);
+        const hStr = h === 0
+            ? ''
+            : h + 'h'
+        const mStr = (h === 0 && m === 0)
+            ? ''
+            : double0(m) + 'm'
+        const sStr = double0(s) + 's'
+        client.say(channel, `@${tags.username}, Next: ${title} in ${hStr}${mStr}${sStr}`);
         console.log(calcDate)
     }
     if (command === 'now') {
@@ -108,13 +107,19 @@ client.on('message', function (channel, tags, message, self) {
             return
         const { title, date } = e
         const calcDate = Date.now() - date.getTime()
-        console.log(new Date, date);
+        const calcDate2 = _data[1].date.getTime() - date.getTime()
+        console.log(calcDate2);
         const h = Math.floor(calcDate / 1000 / 60 / 60)
         const m = Math.floor(calcDate / 1000 / 60) % 60
         const s = Math.floor(calcDate / 1000) % 60
         const mStr = double0(m)
         const sStr = double0(s)
-        client.say(channel, `@${tags.username}, Now: ${title} (${h}h${mStr}m${sStr}s)`);
+        const h2 = Math.floor(calcDate2 / 1000 / 60 / 60)
+        const m2 = Math.floor(calcDate2 / 1000 / 60) % 60
+        const s2 = Math.floor(calcDate2 / 1000) % 60
+        const m2Str = double0(m2)
+        const s2Str = double0(s2)
+        client.say(channel, `@${tags.username}, Now: ${title} (${h}:${mStr}:${sStr}-${h2}:${m2Str}:${s2Str})`);
     }
     // console.log(...arguments)
 });

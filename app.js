@@ -162,6 +162,6 @@ client.on('message', function (channel, tags, message, self) {
 
 channels.forEach(channel => {
     setInterval(() => {
-        client.say('#' + channel, 'Commands: !next and !now')
+        client.say(channel, 'Commands: !next and !now')
     }, 60 * 60 * 1000)
 })

@@ -1,13 +1,13 @@
-const fs = require('fs')
+// const fs = require('fs')
 require('dotenv').config();
 
 const tmi = require('tmi.js');
 
 const client = new tmi.Client({
-    options: { debug: true },
+    // options: { debug: true },
     identity: {
         username: process.env.TWITCH_USERNAME,
-        password: `oauth:${process.env.TWITCH_OAUTH}`
+        password: process.env.TWITCH_OAUTH
     },
     channels: [process.env.TWITCH_CHANNEL]
 });
@@ -17,71 +17,90 @@ client.connect();
 const double0 = str => ('0' + str).slice(-2)
 
 const updateData = () => {
-    let fIndex = _data.findIndex(e => e.date.getTime() > Date.now()) - 1
+    let fIndex = timeList.findIndex(e => e.date.getTime() > Date.now()) - 1
     if (fIndex < 0)
         fIndex = 0
-    _data = _data.slice(fIndex)
+    timeList = timeList.slice(fIndex)
 }
 
-fs.mkdir('./data', { recursive: true }, (err) => {
-    if (err) throw err;
-});
+// fs.mkdir('./data', { recursive: true }, (err) => {
+//     if (err) throw err;
+// });
 
-let _data
-try {
-    const data = JSON.parse(fs.readFileSync('./data/_data.json'))
-    _data = data.map(e => ({ ...e, date: new Date(e.date) }))
+let timeList
+// try {
+//     const data = JSON.parse(fs.readFileSync('./data/timeList.json'))
+//     timeList = data.map(e => ({ ...e, date: new Date(e.date) }))
+// } catch (error) { console.error(error) }
 
-} catch (error) { console.error(error) }
+const nameRegex = new RegExp(`^@?${process.env.TWITCH_USERNAME}$`)
 
 client.on('message', function (channel, tags, message, self) {
-    if (self || !message.startsWith('!')) return;
+    if (self || !(
+        message.startsWith('!') ||
+        message.startsWith(process.env.TWITCH_USERNAME) ||
+        message.startsWith(`@${process.env.TWITCH_USERNAME}`))) return;
 
-    const args = message.slice(1).split(' ');
+    const args = message.split(' ');
     const command = args.shift().toLowerCase();
 
-    if (command === 'echo') {
-        client.say(channel, `@${tags.username}, you said: ${args.join(' ')}`);
-    }
-    if ((command === 'cmd' ||
-        command === 'command' &&
-        args[1] === 'edit' &&
-        args[2] === 'time') ||
+    if (((command === '!cmd' ||
+        command === '!command') &&
+        args[0] === 'edit' &&
+        args[1] === 'time') ||
         command === 'test') {
         const listMsg = message.replace(/.*]/, '')
         const arr = listMsg.split(' ⏩ ')
+        const utc = message.match(/UTC\+(-?\d+)]/)?.[1] || 0
         const a = arr.map(e => e.split(/(?=\(\d\d?:\d{2}\))/))
         const b = a.map(e => {
             const time = e[1].slice(1, -1)
             const title = e[0].trim()
             return { title, time }
         })
+        console.log(`${new Date().toJSON()} ${tags['display-name']}: ${message}`)
         const dayInMs = 24 * 60 * 60 * 1000
-        const d = new Date()
+        const d = new Date(Date.now())
         const c = b.map((e, i) => {
             const { title, time } = e
             const [h, m] = time.split(':')
             const date = new Date(d.getTime())
-            date.setHours(h)
-            date.setMinutes(m)
-            const t = date.getTime()
-            const tBase = d.getTime()
+            let realH = parseInt(h) + utc * -1
+            let realM = parseInt(m) + utc * -1
+            if (realH < 0)
+                realH = 24 - realH
+            if (realM < 0)
+                realM = 24 - realM
+            date.setHours(realH)
+            date.setMinutes(realM)
+            let t = date.getTime()
+            let tBase = d.getTime()
             if (i === 0) {
-                d.setTime(t)
+                if (t > tBase + 12 * 60 * 60 * 1000)
+                    date.setTime(t + dayInMs)
+                else if (t < tBase - 12 * 60 * 60 * 1000)
+                    date.setTime(t - dayInMs)
+                else
+                    date.setTime(t)
+                t = date.getTime()
             } else if (t < tBase) {
                 d.setTime(t + dayInMs)
                 date.setTime(t + dayInMs)
             }
             return { title, date }
         })
-        _data = c
-        fs.writeFileSync('./data/_data.json', JSON.stringify(c, null, 4))
+        timeList = c
+        client.say(channel, `Loaded ${c.length} items.`);
+        // fs.writeFileSync('./data/timeList.json', JSON.stringify(c, null, 4))
     }
-    if (command === 'next') {
+    if (command === '!next') {
+        console.log(`${new Date().toJSON()} ${tags['display-name']}: ${message}`)
+        if (!timeList)
+            return
         updateData()
-        const e = _data[1]
+        const e = timeList[1]
         if (!e) {
-            client.say(channel, `@${tags.username}, Next: eShrug `);
+            client.say(channel, `@${tags['display-name']}, eShrug `);
             return
         }
         const { title, date } = e
@@ -96,19 +115,21 @@ client.on('message', function (channel, tags, message, self) {
             ? ''
             : double0(m) + 'm'
         const sStr = double0(s) + 's'
-        client.say(channel, `@${tags.username}, Next: ${title} in ${hStr}${mStr}${sStr}`);
-        console.log(calcDate)
+        client.say(channel, `@${tags['display-name']}, Next: ${title} in ${hStr}${mStr}${sStr}`);
     }
-    if (command === 'now') {
+    if (command === '!now') {
+        console.log(`${new Date().toJSON()} ${tags['display-name']}: ${message}`)
+        if (!timeList)
+            return
         updateData()
-        const e = _data[0]
-        console.log(_data)
+        const e = timeList[0]
         if (!e)
             return
         const { title, date } = e
         const calcDate = Date.now() - date.getTime()
-        const calcDate2 = _data[1].date.getTime() - date.getTime()
-        console.log(calcDate2);
+        const calcDate2 = timeList[1]
+            ? timeList[1].date.getTime() - date.getTime()
+            : 0
         const h = Math.floor(calcDate / 1000 / 60 / 60)
         const m = Math.floor(calcDate / 1000 / 60) % 60
         const s = Math.floor(calcDate / 1000) % 60
@@ -119,7 +140,22 @@ client.on('message', function (channel, tags, message, self) {
         const s2 = Math.floor(calcDate2 / 1000) % 60
         const m2Str = double0(m2)
         const s2Str = double0(s2)
-        client.say(channel, `@${tags.username}, Now: ${title} (${h}:${mStr}:${sStr}-${h2}:${m2Str}:${s2Str})`);
+        let restStr = ` - ${h2}:${m2Str}:${s2Str}`
+        if (calcDate2 === 0)
+            restStr = ''
+        client.say(channel, `@${tags['display-name']}, Now: ${title} (${h}:${mStr}:${sStr}${restStr})`);
     }
-    // console.log(...arguments)
+    if (command.match(nameRegex)) {
+        if (args[0] === 'amongE') {
+            console.log(`${new Date().toJSON()} ${tags['display-name']}: ${message}`)
+            client.say(channel, `AMOGUS haHAA I'M IRONIC haHAA I'M NOT AN AMONG US NORMIE BTW haHAA`)
+        }
+        if (args[0] === 'GETALIFE') {
+            console.log(`${new Date().toJSON()} ${tags['display-name']}: ${message}`)
+            client.say(channel, `Who is ${tags['display-name']} talking to LULE`)
+        }
+    }
 });
+setInterval(() => {
+    client.say(channel, 'Commands: !next and !now')
+}, 60 * 60 * 1000)

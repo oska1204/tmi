@@ -2,6 +2,9 @@
 require('dotenv').config();
 
 const tmi = require('tmi.js');
+const { channel } = require('tmi.js/lib/utils');
+
+const channels = [process.env.TWITCH_CHANNEL]
 
 const client = new tmi.Client({
     // options: { debug: true },
@@ -9,7 +12,7 @@ const client = new tmi.Client({
         username: process.env.TWITCH_USERNAME,
         password: process.env.TWITCH_OAUTH
     },
-    channels: [process.env.TWITCH_CHANNEL]
+    channels
 });
 
 client.connect();
@@ -156,6 +159,9 @@ client.on('message', function (channel, tags, message, self) {
         }
     }
 });
-setInterval(() => {
-    client.say(channel, 'Commands: !next and !now')
-}, 60 * 60 * 1000)
+
+channels.forEach(channel => {
+    setInterval(() => {
+        client.say('#' + channel, 'Commands: !next and !now')
+    }, 60 * 60 * 1000)
+})

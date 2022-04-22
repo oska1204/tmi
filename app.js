@@ -25,13 +25,15 @@ const updateData = () => {
     timeList = timeList.slice(fIndex)
 }
 
-const commandsStr = 'Commands: !now, !next, !pyramid (1 min cd) and !commands'
+const commandsStr = 'Commands: !now, !next, !skip, !pyramid (1 min cd) and !commands'
 
 // fs.mkdir('./data', { recursive: true }, (err) => {
 //     if (err) throw err;
 // });
 
 let timeList
+
+let timeoutList = []
 
 const pyramidCooldown = minToMs(1)
 let lastPyramid = new Date(Date.now() - pyramidCooldown)
@@ -102,9 +104,15 @@ client.on('message', function (channel, tags, message, self) {
             const t = d.getTime()
             const ms = minToMs(minutes)
             const date = new Date(t + ms)
+            d.setTime(date)
             return { ...e, date }
         })
         timeList = c
+        timeoutList.forEach(e => clearTimeout(e))
+        updateData()
+        timeoutList = timeList.map(e => setTimeout(() => {
+            client.say(channel, `!settitle 🧽 - ${e.title} - Baj movies`);
+        }, e.date.getTime() - Date.now()))
         client.say(channel, `Loaded ${c.length} items.`);
         // fs.writeFileSync('./data/timeList.json', JSON.stringify(c, null, 4))
     }

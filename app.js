@@ -66,13 +66,11 @@ client.on('message', function (channel, tags, message, self) {
         log();
         const dayInMs = 24 * 60 * 60 * 1000
         const minuteArr = b.map((e, i, a) => {
-            const [h, m] = e.time.split(':').map(e => parseInt(e))
-            if (a.length === 1)
-                return { ...e, minutes: h * 60 + m }
             if (i === 0)
                 return { ...e, minutes: 0 }
             const p = a[i - 1]
             const [hh, mm] = p.time.split(':').map(e => parseInt(e))
+            const [h, m] = e.time.split(':').map(e => parseInt(e))
             let minutes = (h - hh) * 60 + m - mm
             if (minutes < 0)
                 minutes += 24 * 60
@@ -82,8 +80,9 @@ client.on('message', function (channel, tags, message, self) {
             .map(e => parseInt(e))
         const d = new Date()
         const now = d.getTime()
-        d.setHours(hStart + utc * -1)
-        d.setMinutes(mStart + utc * -1)
+        d.setUTCHours(hStart - utc)
+        d.setUTCMinutes(mStart)
+        d.setUTCSeconds(0)
         const dTime = d.getTime()
         if (dTime > now + 12 * 60 * 60 * 1000)
             d.setTime(dTime + dayInMs)

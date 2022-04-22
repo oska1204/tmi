@@ -45,7 +45,9 @@ client.on('message', function (channel, tags, message, self) {
         message.startsWith(`@${process.env.TWITCH_USERNAME}`))) return;
 
     const args = message.split(' ');
-    const command = args.shift().toLowerCase();
+    const command = args.shift()
+        .toLowerCase()
+        .replace(/,?$/, '');
 
     if (((command === '!cmd' ||
         command === '!command') &&
@@ -64,11 +66,13 @@ client.on('message', function (channel, tags, message, self) {
         log();
         const dayInMs = 24 * 60 * 60 * 1000
         const minuteArr = b.map((e, i, a) => {
+            const [h, m] = e.time.split(':').map(e => parseInt(e))
+            if (a.length === 1)
+                return { ...e, minutes: h * 60 + m }
             if (i === 0)
                 return { ...e, minutes: 0 }
             const p = a[i - 1]
             const [hh, mm] = p.time.split(':').map(e => parseInt(e))
-            const [h, m] = e.time.split(':').map(e => parseInt(e))
             let minutes = (h - hh) * 60 + m - mm
             if (minutes < 0)
                 minutes += 24 * 60
@@ -158,11 +162,29 @@ client.on('message', function (channel, tags, message, self) {
             client.say(channel, `Who is ${tags['display-name']} talking to LULE`)
         }
     }
+    if (command === '!pyramid') {
+        if (args[0] && !args.match(/^[+=!@]/))
+            pyramidFn(channel, args[0])
+    }
 
     function log() {
         console.log(`${new Date().toJSON()} ${tags['display-name']}: ${message}`)
     }
 });
+
+async function pyramidFn(channel, msg) {
+    const fn = str => {
+        return new Promise(res => {
+            client.say(channel, str)
+            setTimeout(res, 1250)
+        })
+    }
+    await fn(msg)
+    await fn(`${msg} `.repeat(2))
+    await fn(`${msg} `.repeat(3))
+    await fn(`${msg} `.repeat(2))
+    await fn(msg)
+}
 
 channels.forEach(channel => {
     setInterval(() => {

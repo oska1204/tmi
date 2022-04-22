@@ -52,7 +52,7 @@ client.on('message', function (channel, tags, message, self) {
         args[0] === 'edit' &&
         args[1] === 'time') ||
         command === 'test') {
-        const listMsg = message.replace(/.*]/, '')
+        const listMsg = message.slice(message.indexOf(']') + 1)
         const arr = listMsg.split(' ⏩ ')
         const utc = message.match(/UTC\+(-?\d+)]/)?.[1] || 0
         const a = arr.map(e => e.split(/(?=\(\d\d?:\d{2}\))/))

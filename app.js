@@ -63,34 +63,34 @@ client.on('message', function (channel, tags, message, self) {
         })
         log();
         const dayInMs = 24 * 60 * 60 * 1000
-        const d = new Date(Date.now())
-        const c = b.map((e, i) => {
-            const { title, time } = e
-            const [h, m] = time.split(':')
-            const date = new Date(d.getTime())
-            let realH = parseInt(h) + utc * -1
-            let realM = parseInt(m) + utc * -1
-            if (realH < 0)
-                realH = 24 - realH
-            if (realM < 0)
-                realM = 24 - realM
-            date.setHours(realH)
-            date.setMinutes(realM)
-            let t = date.getTime()
-            let tBase = d.getTime()
-            if (i === 0) {
-                if (t > tBase + 12 * 60 * 60 * 1000)
-                    date.setTime(t + dayInMs)
-                else if (t < tBase - 12 * 60 * 60 * 1000)
-                    date.setTime(t - dayInMs)
-                else
-                    date.setTime(t)
-                t = date.getTime()
-            } else if (t < tBase) {
-                d.setTime(t + dayInMs)
-                date.setTime(t + dayInMs)
-            }
-            return { title, date }
+        const minuteArr = b.map((e, i, a) => {
+            if (i === 0)
+                return { ...e, minutes: 0 }
+            const p = a[i - 1]
+            const [hh, mm] = p.time.split(':').map(e => parseInt(e))
+            const [h, m] = e.time.split(':').map(e => parseInt(e))
+            let minutes = (h - hh) * 60 + m - mm
+            if (minutes < 0)
+                minutes += 24 * 60
+            return { ...e, minutes }
+        })
+        console.log(minuteArr[0])
+        const [hStart, mStart] = minuteArr[0].time.split(':')
+        const d = new Date()
+        const now = d.getTime()
+        d.setHours(hStart)
+        d.setMinutes(mStart)
+        const dTime = d.getTime()
+        if (dTime > now + 12 * 60 * 60 * 1000)
+            d.setTime(dTime + dayInMs)
+        else if (dTime < now - 12 * 60 * 60 * 1000)
+            d.setTime(dTime - dayInMs)
+        const c = minuteArr.map(e => {
+            const { minutes } = e
+            const t = d.getTime()
+            const ms = minToMs(minutes)
+            const date = new Date(t + ms)
+            return { ...e, date }
         })
         timeList = c
         client.say(channel, `Loaded ${c.length} items.`);
@@ -143,7 +143,7 @@ client.on('message', function (channel, tags, message, self) {
         const s2 = Math.floor(calcDate2 / 1000) % 60
         const m2Str = double0(m2)
         const s2Str = double0(s2)
-        let restStr = ` - ${h2}:${m2Str}:${s2Str}`
+        let restStr = `/${h2}:${m2Str}:${s2Str}`
         if (calcDate2 === 0)
             restStr = ''
         client.say(channel, `@${tags['display-name']}, Now: ${title} (${h}:${mStr}:${sStr}${restStr})`);
@@ -169,3 +169,7 @@ channels.forEach(channel => {
         client.say(channel, 'Commands: !next and !now')
     }, 60 * 60 * 1000)
 })
+
+function minToMs(num) {
+    return num * 60 * 1000
+}

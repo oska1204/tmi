@@ -2,6 +2,7 @@
 require('dotenv').config();
 
 const tmi = require('tmi.js');
+const { channel } = require('tmi.js/lib/utils');
 
 const channels = [process.env.TWITCH_CHANNEL]
 
@@ -31,7 +32,7 @@ const commandsStr = 'Commands: !now, !next, !skip, !pyramid (1 min cd) and !comm
 //     if (err) throw err;
 // });
 
-let timeList
+let timeList = []
 
 let timeoutList = []
 
@@ -43,6 +44,23 @@ let lastPyramid = new Date(Date.now() - pyramidCooldown)
 // } catch (error) { console.error(error) }
 
 const nameRegex = new RegExp(`^@?${process.env.TWITCH_USERNAME}$`)
+
+let hostChannel = ''
+
+client.on('hosting', function (channel, host, i) {
+    hostChannel = host
+    if (timeList.length === 0)
+        return
+    const e = timeList[0]
+    const title = e?.title || ''
+    if (!title)
+        return
+    client.say(hostChannel, `!settitle 🧽 ${title} - Baj movies`);
+})
+
+client.on('unhost', function (channel, host, i) {
+    console.log(...arguments)
+})
 
 client.on('message', function (channel, tags, message, self) {
     if (self || !(
@@ -111,14 +129,14 @@ client.on('message', function (channel, tags, message, self) {
         timeoutList.forEach(e => clearTimeout(e))
         updateData()
         timeoutList = timeList.map(e => setTimeout(() => {
-            client.say(channel, `!settitle 🧽 - ${e.title} - Baj movies`);
+            client.say(hostChannel, `!settitle 🧽 ${e.title} - Baj movies`);
         }, e.date.getTime() - Date.now()))
         client.say(channel, `Loaded ${c.length} items.`);
         // fs.writeFileSync('./data/timeList.json', JSON.stringify(c, null, 4))
     }
     if (command === '!next') {
         log()
-        if (!timeList)
+        if (timeList.length === 0 === 0)
             return
         updateData()
         const e = timeList[1]
@@ -142,7 +160,7 @@ client.on('message', function (channel, tags, message, self) {
     }
     if (command === '!now') {
         log()
-        if (!timeList)
+        if (timeList.length === 0 === 0)
             return
         updateData()
         const e = timeList[0]
@@ -189,7 +207,7 @@ client.on('message', function (channel, tags, message, self) {
     }
     if (command === '!skip') {
         log()
-        if (!timeList)
+        if (timeList.length === 0 === 0)
             return
         updateData()
         const obj = timeList[0]

@@ -136,7 +136,7 @@ client.on('message', function (channel, tags, message, self) {
     }
     if (command === '!next') {
         log()
-        if (timeList.length === 0 === 0)
+        if (timeList.length === 0)
             return
         updateData()
         const e = timeList[1]
@@ -160,7 +160,7 @@ client.on('message', function (channel, tags, message, self) {
     }
     if (command === '!now') {
         log()
-        if (timeList.length === 0 === 0)
+        if (timeList.length === 0)
             return
         updateData()
         const e = timeList[0]
@@ -187,27 +187,30 @@ client.on('message', function (channel, tags, message, self) {
         client.say(channel, `@${tags['display-name']}, Now: ${title} (${h}:${mStr}:${sStr}${restStr})`);
     }
     if (command.match(nameRegex)) {
-        if (args[0] === 'amongE') {
+        if (args.includes('amongE')) {
             log()
             client.say(channel, `AMOGUS haHAA I'M IRONIC haHAA I'M NOT AN AMONG US NORMIE BTW haHAA`)
         }
-        if (args[0] === 'GETALIFE') {
+        if (args.includes('GETALIFE')) {
             log()
             client.say(channel, `Who is ${tags['display-name']} talking to LULE`)
         }
     }
     if (command === '!pyramid') {
         log()
-        if (args[0] &&
-            !args[0].match(/^[+=!@]/) &&
-            lastPyramid.getTime() + pyramidCooldown < Date.now()) {
-            lastPyramid = new Date()
-            pyramidFn(channel, args.join(' '))
+        if (args[0] && !args[0].match(/^[+=!@]/)) {
+            const t = Date.now() - lastPyramid.getTime();
+            if (t > pyramidCooldown) {
+                lastPyramid = new Date()
+                pyramidFn(channel, args[0])
+            } else {
+                client.say(channel, `@${tags['display-name']}, !pyramid on cooldown (${Math.floor(t / 1000)}s/${pyramidCooldown / 1000}s)`)
+            }
         }
     }
     if (command === '!skip') {
         log()
-        if (timeList.length === 0 === 0)
+        if (timeList.length === 0)
             return
         updateData()
         const obj = timeList[0]

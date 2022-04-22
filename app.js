@@ -2,7 +2,6 @@
 require('dotenv').config();
 
 const tmi = require('tmi.js');
-const { channel } = require('tmi.js/lib/utils');
 
 const channels = [process.env.TWITCH_CHANNEL]
 
@@ -162,7 +161,7 @@ client.on('message', function (channel, tags, message, self) {
         }
     }
     if (command === '!pyramid') {
-        if (args[0] && !args.match(/^[+=!@]/))
+        if (args[0] && !args[0].match(/^[+=!@]/))
             pyramidFn(channel, args[0])
     }
 

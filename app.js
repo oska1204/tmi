@@ -30,6 +30,9 @@ const updateData = () => {
 // });
 
 let timeList
+
+const pyramidCooldown = minToMs(1)
+let lastPyramid = new Date(Date.now() - pyramidCooldown)
 // try {
 //     const data = JSON.parse(fs.readFileSync('./data/timeList.json'))
 //     timeList = data.map(e => ({ ...e, date: new Date(e.date) }))
@@ -161,8 +164,12 @@ client.on('message', function (channel, tags, message, self) {
         }
     }
     if (command === '!pyramid') {
-        if (args[0] && !args[0].match(/^[+=!@]/))
+        if (args[0] &&
+            !args[0].match(/^[+=!@]/) &&
+            lastPyramid.getTime() + pyramidCooldown < Date.now()) {
+            lastPyramid = new Date()
             pyramidFn(channel, args[0])
+        }
     }
 
     function log() {

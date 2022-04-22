@@ -74,12 +74,12 @@ client.on('message', function (channel, tags, message, self) {
                 minutes += 24 * 60
             return { ...e, minutes }
         })
-        console.log(minuteArr[0])
         const [hStart, mStart] = minuteArr[0].time.split(':')
+            .map(e => parseInt(e))
         const d = new Date()
         const now = d.getTime()
-        d.setHours(hStart)
-        d.setMinutes(mStart)
+        d.setHours(hStart + utc * -1)
+        d.setMinutes(mStart + utc * -1)
         const dTime = d.getTime()
         if (dTime > now + 12 * 60 * 60 * 1000)
             d.setTime(dTime + dayInMs)

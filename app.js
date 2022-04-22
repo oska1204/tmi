@@ -25,6 +25,8 @@ const updateData = () => {
     timeList = timeList.slice(fIndex)
 }
 
+const commandsStr = 'Commands: !now, !next, !pyramid (1 min cd) and !commands'
+
 // fs.mkdir('./data', { recursive: true }, (err) => {
 //     if (err) throw err;
 // });
@@ -51,6 +53,11 @@ client.on('message', function (channel, tags, message, self) {
         .toLowerCase()
         .replace(/,?$/, '');
 
+    const log = () => {
+        const msgDate = new Date(parseInt(tags['tmi-sent-ts'])).toJSON()
+        console.log(`${msgDate} ${tags['display-name']}: ${message}`)
+    }
+
     if (((command === '!cmd' ||
         command === '!command') &&
         args[0] === 'edit' &&
@@ -61,7 +68,7 @@ client.on('message', function (channel, tags, message, self) {
         const utc = message.match(/UTC\+(-?\d+)]/)?.[1] || 0
         const a = arr.map(e => e.split(/(?=\(\d\d?:\d{2}\))/))
         const b = a.map(e => {
-            const time = e[1].slice(1, -1)
+            const time = e[1]?.slice(1, -1) || '0:00'
             const title = e[0].trim()
             return { title, time }
         })
@@ -164,16 +171,37 @@ client.on('message', function (channel, tags, message, self) {
         }
     }
     if (command === '!pyramid') {
+        log()
         if (args[0] &&
             !args[0].match(/^[+=!@]/) &&
             lastPyramid.getTime() + pyramidCooldown < Date.now()) {
             lastPyramid = new Date()
-            pyramidFn(channel, args[0])
+            pyramidFn(channel, args.join(' '))
         }
     }
-
-    function log() {
-        console.log(`${new Date().toJSON()} ${tags['display-name']}: ${message}`)
+    if (command === '!skip') {
+        log()
+        if (!timeList)
+            return
+        updateData()
+        const obj = timeList[0]
+        let s = 's'
+        if (!obj.skipArr)
+            obj.skipArr = []
+        if (obj.skipArr.includes(tags.username)) {
+            if (obj.skipArr.length <= 1)
+                s = ''
+            client.say(channel, `Clueless ${tags['display-name']} already voted to skip ${obj.title} (${obj.skipArr.length} vote${s})`)
+        } else {
+            obj.skipArr.push(tags.username)
+            if (obj.skipArr.length <= 1)
+                s = ''
+            client.say(channel, `Clueless surely ${tags['display-name']} voted to skip ${obj.title} (${obj.skipArr.length} vote${s})`)
+        }
+    }
+    if (command === '!commands') {
+        log()
+        client.say(channel, `@${tags['display-name']}, ${commandsStr}`)
     }
 });
 
@@ -184,16 +212,16 @@ async function pyramidFn(channel, msg) {
             setTimeout(res, 1250)
         })
     }
-    await fn(msg)
-    await fn(`${msg} `.repeat(2))
-    await fn(`${msg} `.repeat(3))
-    await fn(`${msg} `.repeat(2))
-    await fn(msg)
+    fn(msg)
+    fn(`${msg} `.repeat(2))
+    fn(`${msg} `.repeat(3))
+    fn(`${msg} `.repeat(2))
+    fn(msg)
 }
 
 channels.forEach(channel => {
     setInterval(() => {
-        client.say(channel, 'Commands: !next and !now')
+        client.say(channel, commandsStr)
     }, 60 * 60 * 1000)
 })
 

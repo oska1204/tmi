@@ -61,7 +61,7 @@ client.on('message', function (channel, tags, message, self) {
             const title = e[0].trim()
             return { title, time }
         })
-        console.log(`${new Date().toJSON()} ${tags['display-name']}: ${message}`)
+        log();
         const dayInMs = 24 * 60 * 60 * 1000
         const d = new Date(Date.now())
         const c = b.map((e, i) => {
@@ -97,7 +97,7 @@ client.on('message', function (channel, tags, message, self) {
         // fs.writeFileSync('./data/timeList.json', JSON.stringify(c, null, 4))
     }
     if (command === '!next') {
-        console.log(`${new Date().toJSON()} ${tags['display-name']}: ${message}`)
+        log()
         if (!timeList)
             return
         updateData()
@@ -121,7 +121,7 @@ client.on('message', function (channel, tags, message, self) {
         client.say(channel, `@${tags['display-name']}, Next: ${title} in ${hStr}${mStr}${sStr}`);
     }
     if (command === '!now') {
-        console.log(`${new Date().toJSON()} ${tags['display-name']}: ${message}`)
+        log()
         if (!timeList)
             return
         updateData()
@@ -150,13 +150,17 @@ client.on('message', function (channel, tags, message, self) {
     }
     if (command.match(nameRegex)) {
         if (args[0] === 'amongE') {
-            console.log(`${new Date().toJSON()} ${tags['display-name']}: ${message}`)
+            log()
             client.say(channel, `AMOGUS haHAA I'M IRONIC haHAA I'M NOT AN AMONG US NORMIE BTW haHAA`)
         }
         if (args[0] === 'GETALIFE') {
-            console.log(`${new Date().toJSON()} ${tags['display-name']}: ${message}`)
+            log()
             client.say(channel, `Who is ${tags['display-name']} talking to LULE`)
         }
+    }
+
+    function log() {
+        console.log(`${new Date().toJSON()} ${tags['display-name']}: ${message}`)
     }
 });
 

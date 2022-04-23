@@ -212,7 +212,7 @@ client.on('message', function (channel, tags, message, self) {
             const nowDate = new Date()
             const t = nowDate.getTime() - lastPyramid.getTime();
             if (t > pyramidCooldown) {
-                if (!!Math.floor(Math.random() * 2)) {
+                if (Math.random() < .3) {
                     const copiumMsg = `@${tags['display-name']} Better luck next time Sadeg`
                     client.say(channel, `/timeout ${tags.username} 60 ${copiumMsg}`)
                     client.say(channel, copiumMsg)

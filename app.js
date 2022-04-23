@@ -1,5 +1,6 @@
 // const fs = require('fs')
 require('dotenv').config();
+const emojiRegexFn = require('emoji-regex');
 
 const tmi = require('tmi.js');
 const { channel } = require('tmi.js/lib/utils');
@@ -25,8 +26,10 @@ const updateData = () => {
     if (fIndex < 0)
         fIndex = 0
     timeList = timeList.slice(fIndex)
-    if (timeList.length !== startList.length)
+    if (timeList.length !== startList.length) {
+        console.log('Before: ', startList)
         console.log('After: ', timeList)
+    }
 }
 
 const commandsStr = `Commands: !now, !next, !skip, !pyramid and !commands`
@@ -47,6 +50,7 @@ let lastPyramid = new Date(Date.now() - pyramidCooldown)
 // } catch (error) { console.error(error) }
 
 const nameRegex = new RegExp(`^@?${process.env.TWITCH_USERNAME}$`)
+const emojiRegex = emojiRegexFn();
 
 let hostChannel = ''
 
@@ -62,7 +66,7 @@ client.on('hosting', function (channel, host, i) {
 })
 
 client.on('unhost', function (channel, host, i) {
-    console.log(...arguments)
+    // console.log(...arguments)
 })
 
 client.on('message', function (channel, tags, message, self) {
@@ -86,6 +90,9 @@ client.on('message', function (channel, tags, message, self) {
         args[0] === 'edit' &&
         args[1] === 'time') ||
         command === '!list') {
+        if (tags?.badges?.broadcaster !== '1' ||
+            !tags.mod)
+            return
         const listMsg = message.slice(message.indexOf(']') + 1)
         const arr = listMsg.split(' ⏩ ')
         const utc = message.match(/UTC\+(-?\d+)]/)?.[1] || 0
@@ -205,8 +212,16 @@ client.on('message', function (channel, tags, message, self) {
             const nowDate = new Date()
             const t = nowDate.getTime() - lastPyramid.getTime();
             if (t > pyramidCooldown) {
+                if (!!Math.floor(Math.random() * 2)) {
+                    const copiumMsg = `@${tags['display-name']} Better luck next time Sadeg`
+                    client.say(channel, `/timeout ${tags.username} 60 ${copiumMsg}`)
+                    client.say(channel, copiumMsg)
+                    return
+                }
                 lastPyramid = nowDate
-                pyramidFn(channel, tags, args[0])
+                const text = args[0]
+                const msg = text.match(emojiRegex)?.[0] || text
+                pyramidFn(channel, tags, msg)
             } else {
                 client.say(channel, `@${tags['display-name']}, !pyramid on cooldown (${Math.floor(t / 1000)}s/${pyramidCooldown / 1000}s)`)
             }
@@ -239,10 +254,6 @@ client.on('message', function (channel, tags, message, self) {
 });
 
 async function pyramidFn(channel, tags, msg) {
-    if (!!Math.floor(Math.random() * 2)) {
-        client.say(channel, `/timeout ${tags.username} 60 @${tags['display-name']} Better luck next time Sadeg`)
-        return
-    }
     const fn = str => {
         return new Promise(res => {
             client.say(channel, str)

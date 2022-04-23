@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.0.0",
+    "emoji-regex": "^10.1.0",
     "tmi.js": "^1.8.5"
   }
 }

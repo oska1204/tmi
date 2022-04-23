@@ -20,15 +20,16 @@ client.connect();
 const double0 = str => ('0' + str).slice(-2)
 
 const updateData = () => {
-    console.log('Before: ', timeList)
+    const startList = timeList
     let fIndex = timeList.findIndex(e => e.date.getTime() > Date.now()) - 1
     if (fIndex < 0)
         fIndex = 0
     timeList = timeList.slice(fIndex)
-    console.log('After: ', timeList)
+    if (timeList.length !== startList.length)
+        console.log('After: ', timeList)
 }
 
-const commandsStr = 'Commands: !now, !next, !skip, !pyramid (1 min cd) and !commands'
+const commandsStr = `Commands: !now, !next, !skip, !pyramid and !commands`
 
 // fs.mkdir('./data', { recursive: true }, (err) => {
 //     if (err) throw err;
@@ -201,10 +202,11 @@ client.on('message', function (channel, tags, message, self) {
     if (command === '!pyramid') {
         log()
         if (args[0] && !args[0].match(/^[+=!@]/)) {
-            const t = Date.now() - lastPyramid.getTime();
+            const nowDate = new Date()
+            const t = nowDate.getTime() - lastPyramid.getTime();
             if (t > pyramidCooldown) {
-                lastPyramid = new Date()
-                pyramidFn(channel, args[0])
+                lastPyramid = nowDate
+                pyramidFn(channel, tags, args[0])
             } else {
                 client.say(channel, `@${tags['display-name']}, !pyramid on cooldown (${Math.floor(t / 1000)}s/${pyramidCooldown / 1000}s)`)
             }
@@ -236,7 +238,11 @@ client.on('message', function (channel, tags, message, self) {
     }
 });
 
-async function pyramidFn(channel, msg) {
+async function pyramidFn(channel, tags, msg) {
+    if (!!Math.floor(Math.random() * 2)) {
+        client.say(channel, `/timeout ${tags.username} 60 @${tags['display-name']} Better luck next time Sadeg`)
+        return
+    }
     const fn = str => {
         return new Promise(res => {
             client.say(channel, str)
@@ -258,4 +264,8 @@ channels.forEach(channel => {
 
 function minToMs(num) {
     return num * 60 * 1000
+}
+
+function msToMin(num) {
+    return Math.floor(num / 60 / 1000)
 }

@@ -76,15 +76,15 @@ client.on('message', function (channel, tags, message, self) {
         .replace(/,?$/, '');
 
     const log = () => {
-        const msgDate = new Date(parseInt(tags['tmi-sent-ts'])).toJSON()
-        console.log(`${msgDate} ${tags['display-name']}: ${message}`)
+        // const msgDate = new Date(parseInt(tags['tmi-sent-ts'])).toJSON()
+        // console.log(`${msgDate} ${tags['display-name']}: ${message}`)
     }
 
     if (((command === '!cmd' ||
         command === '!command') &&
         args[0] === 'edit' &&
         args[1] === 'time') ||
-        command === 'list') {
+        command === '!list') {
         const listMsg = message.slice(message.indexOf(']') + 1)
         const arr = listMsg.split(' ⏩ ')
         const utc = message.match(/UTC\+(-?\d+)]/)?.[1] || 0

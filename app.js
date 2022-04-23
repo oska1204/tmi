@@ -20,10 +20,12 @@ client.connect();
 const double0 = str => ('0' + str).slice(-2)
 
 const updateData = () => {
+    console.log('Before: ', timeList)
     let fIndex = timeList.findIndex(e => e.date.getTime() > Date.now()) - 1
     if (fIndex < 0)
         fIndex = 0
     timeList = timeList.slice(fIndex)
+    console.log('After: ', timeList)
 }
 
 const commandsStr = 'Commands: !now, !next, !skip, !pyramid (1 min cd) and !commands'
@@ -36,7 +38,7 @@ let timeList = []
 
 let timeoutList = []
 
-const pyramidCooldown = minToMs(1)
+const pyramidCooldown = minToMs(2)
 let lastPyramid = new Date(Date.now() - pyramidCooldown)
 // try {
 //     const data = JSON.parse(fs.readFileSync('./data/timeList.json'))
@@ -82,7 +84,7 @@ client.on('message', function (channel, tags, message, self) {
         command === '!command') &&
         args[0] === 'edit' &&
         args[1] === 'time') ||
-        command === 'test') {
+        command === 'list') {
         const listMsg = message.slice(message.indexOf(']') + 1)
         const arr = listMsg.split(' ⏩ ')
         const utc = message.match(/UTC\+(-?\d+)]/)?.[1] || 0

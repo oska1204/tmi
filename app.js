@@ -90,7 +90,7 @@ client.on('message', function (channel, tags, message, self) {
         args[0] === 'edit' &&
         args[1] === 'time') ||
         command === '!list') {
-        if (tags?.badges?.broadcaster !== '1' ||
+        if (tags?.badges?.broadcaster !== '1' &&
             !tags.mod)
             return
         const listMsg = message.slice(message.indexOf(']') + 1)

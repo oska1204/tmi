@@ -32,7 +32,7 @@ const updateData = () => {
     }
 }
 
-const commandsStr = `Commands: !now, !next, !skip, !pyramid and !commands`
+const commandsStr = `Commands: !now, !next, !skip, !pyramid and !commands. Mod commands: !pyramid-cd <minutes>`
 
 // fs.mkdir('./data', { recursive: true }, (err) => {
 //     if (err) throw err;
@@ -42,7 +42,7 @@ let timeList = []
 
 let timeoutList = []
 
-const pyramidCooldown = minToMs(2)
+let pyramidCooldown = minToMs(2)
 let lastPyramid = new Date(Date.now() - pyramidCooldown)
 // try {
 //     const data = JSON.parse(fs.readFileSync('./data/timeList.json'))
@@ -85,13 +85,15 @@ client.on('message', function (channel, tags, message, self) {
         // console.log(`${msgDate} ${tags['display-name']}: ${message}`)
     }
 
+    const isMod = tags.mod ||
+        tags?.badges?.broadcaster === '1'
+
     if (((command === '!cmd' ||
         command === '!command') &&
         args[0] === 'edit' &&
         args[1] === 'time') ||
         command === '!list') {
-        if (tags?.badges?.broadcaster !== '1' &&
-            !tags.mod)
+        if (!isMod)
             return
         const listMsg = message.slice(message.indexOf(']') + 1)
         const arr = listMsg.split(' ⏩ ')
@@ -251,6 +253,14 @@ client.on('message', function (channel, tags, message, self) {
         log()
         client.say(channel, `@${tags['display-name']}, ${commandsStr}`)
     }
+    if (command === '!pyramid-cd') {
+        if (!isMod)
+            return
+        const minutes = parseFloat(args[0])
+        const isNaN = Number.isNaN(minutes)
+        if (!isNaN)
+            pyramidCooldown = minToMs(minutes)
+    }
 });
 
 async function pyramidFn(channel, tags, msg) {
@@ -275,8 +285,4 @@ channels.forEach(channel => {
 
 function minToMs(num) {
     return num * 60 * 1000
-}
-
-function msToMin(num) {
-    return Math.floor(num / 60 / 1000)
 }

@@ -258,8 +258,10 @@ client.on('message', function (channel, tags, message, self) {
             return
         const minutes = parseFloat(args[0])
         const isNaN = Number.isNaN(minutes)
-        if (!isNaN)
+        if (!isNaN) {
             pyramidCooldown = minToMs(minutes)
+            client.say(channel, `@${tags['display-name']}, set !pyramid cooldown to ${minutes} minutes`)
+        }
     }
 });
 

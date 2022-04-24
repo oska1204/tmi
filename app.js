@@ -44,6 +44,7 @@ let timeoutList = []
 
 let pyramidCooldown = minToMs(2)
 const lastPyramid = {}
+let lastPyramidGlobal
 // try {
 //     const data = JSON.parse(fs.readFileSync('./data/timeList.json'))
 //     timeList = data.map(e => ({ ...e, date: new Date(e.date) }))
@@ -51,6 +52,7 @@ const lastPyramid = {}
 
 const nameRegex = new RegExp(`^@?${process.env.TWITCH_USERNAME}$`)
 const emojiRegex = emojiRegexFn();
+const dayInMs = 24 * 60 * 60 * 1000
 
 let hostChannel = ''
 
@@ -105,7 +107,6 @@ client.on('message', function (channel, tags, message, self) {
             return { title, time }
         })
         log();
-        const dayInMs = 24 * 60 * 60 * 1000
         const minuteArr = b.map((e, i, a) => {
             if (i === 0)
                 return { ...e, minutes: 0 }
@@ -217,19 +218,20 @@ client.on('message', function (channel, tags, message, self) {
             }
             const nowDate = new Date()
             const t = nowDate.getTime() - lastPyramid[num]?.getTime() || Infinity
-            const tb = nowDate.getTime() - lastPyramid[3]?.getTime() || 0
+            const tb = nowDate.getTime() - lastPyramidGlobal?.getTime() || Infinity
             if (t > pyramidCooldown * (num - 2)) {
-                if (tb > pyramidCooldown) {
-                    client.say(channel, `@${tags['display-name']}, pyramid on cooldown (${Math.floor(t / 1000)}s/${Math.round(pyramidCooldown / 1000)}s)`)
+                lastPyramidGlobal = nowDate
+                if (tb < pyramidCooldown) {
+                    client.say(channel, `@${tags['display-name']}, pyramid on global cooldown (${Math.floor(tb / 1000)}s/${Math.round(pyramidCooldown / 1000)}s)`)
                     return
                 }
-                lastPyramid[num] = nowDate
-                if (Math.random() < .2) {
+                if (Math.random() < .25) {
                     const copiumMsg = `@${tags['display-name']} Better luck next time Sadeg`
                     client.say(channel, `!band ${tags.username}`)
                     client.say(channel, copiumMsg)
                     return
                 }
+                lastPyramid[num] = nowDate
                 const text = args[0]
                 const msg = text.match(emojiRegex)?.[0] || text
                 pyramidFn(channel, msg, num)

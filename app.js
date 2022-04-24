@@ -210,13 +210,13 @@ client.on('message', function (channel, tags, message, self) {
     }
     if (command === '!pyramid') {
         log()
-        if (args[0] && !args[0].match(/^[+=!@]/)) {
+        if (args[0] && !args[0].match(/^[+=!@/]/)) {
             const nowDate = new Date()
             const t = nowDate.getTime() - lastPyramid.getTime();
             if (t > pyramidCooldown) {
                 if (Math.random() < .3) {
                     const copiumMsg = `@${tags['display-name']} Better luck next time Sadeg`
-                    client.say(channel, `/timeout ${tags.username} 60 ${copiumMsg}`)
+                    client.say(channel, `!band ${tags.username}`)
                     client.say(channel, copiumMsg)
                     return
                 }
@@ -266,12 +266,7 @@ client.on('message', function (channel, tags, message, self) {
 });
 
 async function pyramidFn(channel, tags, msg) {
-    const fn = str => {
-        return new Promise(res => {
-            client.say(channel, str)
-            setTimeout(res, 1250)
-        })
-    }
+    const fn = str => client.say(channel, str)
     fn(msg)
     fn(`${msg} `.repeat(2))
     fn(`${msg} `.repeat(3))

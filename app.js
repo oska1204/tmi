@@ -37,7 +37,8 @@ const updateData = () => {
     }
 }
 
-const commandsStr = `Commands: !now, !next, !skip, !pyramid and !commands. Mod commands: !pyramid-cd <minutes>`
+const modCommandsStr = `. Mod commands: !pyramid-cd <minutes>, !max-width <width> and !toggle-pyramid`
+const commandsStr = `Commands: !now, !next, !skip, !pyramid, !commands and !mod-commands`
 
 try {
     fs.mkdir('./data', { recursive: true }, (err) => {
@@ -50,6 +51,8 @@ let timeList = []
 
 let timeoutList = []
 
+let pyramidEnabled = true
+let maxWidth = 5
 let pyramidCooldown = minToMs(2)
 const lastPyramid = {}
 let lastPyramidGlobal
@@ -221,14 +224,16 @@ client.on('message', function (channel, tags, message, self) {
     }
     if (command === '!pyramid') {
         log()
-        if (args[0]) {
+        if (args[0] && pyramidEnabled) {
             if (args[0].match(/^[+=!@/]/)) {
                 client.say(channel, 'mods no pyramids that start with +=!@/')
                 return
             }
             let num = parseInt(args[1])
-            if (Number.isNaN(num) || num < 3 || num > 5) {
+            if (Number.isNaN(num) || num < 3) {
                 num = 3
+            } else if (num > maxWidth) {
+                num = maxWidth
             }
             const nowDate = new Date()
             const t = nowDate.getTime() - lastPyramid[num]?.getTime() || Infinity
@@ -276,7 +281,7 @@ client.on('message', function (channel, tags, message, self) {
     }
     if (command === '!commands') {
         log()
-        client.say(channel, `@${tags['display-name']}, ${commandsStr}`)
+        client.say(channel, `@${tags['display-name']}, ${commandsStr} ${modCommandsStr}`)
     }
     if (command === '!pyramid-cd') {
         if (!isMod)
@@ -287,6 +292,22 @@ client.on('message', function (channel, tags, message, self) {
             pyramidCooldown = minToMs(minutes)
             client.say(channel, `@${tags['display-name']}, set !pyramid cooldown to ${minutes} minutes`)
         }
+    }
+    if (command === '!max-width') {
+        if (!isMod)
+            return
+        const width = parseFloat(args[0])
+        const isNaN = Number.isNaN(width)
+        if (!isNaN) {
+            maxWidth = width
+            client.say(channel, `@${tags['display-name']}, set !max-width of pyramid to ${width}`)
+        }
+    }
+    if (command === '!toggle-pyramid') {
+        if (!isMod)
+            return
+            pyramidEnabled = !pyramidEnabled
+            client.say(channel, `@${tags['display-name']}, ${pyramidEnabled ? 'en' : 'dis'}abled !pyramid`)
     }
 });
 
@@ -303,7 +324,7 @@ async function pyramidFn(channel, msg, width) {
 channels.forEach(channel => {
     setInterval(() => {
         client.say(channel, commandsStr)
-    }, 60 * 60 * 1000)
+    }, 2 * 60 * 60 * 1000)
 })
 
 function minToMs(num) {

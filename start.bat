@@ -1,1 +1,1 @@
-node app
+npm run start

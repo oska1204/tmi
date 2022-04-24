@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app",
-    "watch": "nodemon app"
+    "watch": "nodemon app",
+    "dev": "SET TWITCH_DEV_MODE=& nodemon test"
   },
   "keywords": [],
   "author": "",

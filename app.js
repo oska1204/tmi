@@ -1,11 +1,16 @@
-// const fs = require('fs')
+let fs
+try {
+    fs = require('fs')
+} catch { }
 require('dotenv').config();
 const emojiRegexFn = require('emoji-regex');
-
 const tmi = require('tmi.js');
-const { channel } = require('tmi.js/lib/utils');
 
-const channels = [process.env.TWITCH_CHANNEL]
+const channels = [
+    process.env.TWITCH_DEV_MODE
+        ? process.env.TWITCH_CHANNEL_DEV
+        : process.env.TWITCH_CHANNEL
+]
 
 const client = new tmi.Client({
     // options: { debug: true },
@@ -34,9 +39,12 @@ const updateData = () => {
 
 const commandsStr = `Commands: !now, !next, !skip, !pyramid and !commands. Mod commands: !pyramid-cd <minutes>`
 
-// fs.mkdir('./data', { recursive: true }, (err) => {
-//     if (err) throw err;
-// });
+try {
+    fs.mkdir('./data', { recursive: true }, (err) => {
+        if (err) throw err;
+    });
+} catch { }
+
 
 let timeList = []
 
@@ -45,10 +53,10 @@ let timeoutList = []
 let pyramidCooldown = minToMs(2)
 const lastPyramid = {}
 let lastPyramidGlobal
-// try {
-//     const data = JSON.parse(fs.readFileSync('./data/timeList.json'))
-//     timeList = data.map(e => ({ ...e, date: new Date(e.date) }))
-// } catch (error) { console.error(error) }
+try {
+    const data = JSON.parse(fs.readFileSync('./data/timeList.json'))
+    timeList = data.map(e => ({ ...e, date: new Date(e.date) }))
+} catch (error) { console.error(error) }
 
 const nameRegex = new RegExp(`^@?${process.env.TWITCH_USERNAME}$`)
 const emojiRegex = emojiRegexFn();
@@ -145,7 +153,9 @@ client.on('message', function (channel, tags, message, self) {
             client.say(hostChannel, `!settitle 🧽 ${e.title} - Baj movies`);
         }, e.date.getTime() - Date.now()))
         client.say(channel, `Loaded ${c.length} items.`);
-        // fs.writeFileSync('./data/timeList.json', JSON.stringify(c, null, 4))
+        try {
+            fs.writeFileSync('./data/timeList.json', JSON.stringify(c, null, 4))
+        } catch { }
     }
     if (command === '!next') {
         log()
@@ -211,9 +221,13 @@ client.on('message', function (channel, tags, message, self) {
     }
     if (command === '!pyramid') {
         log()
-        if (args[0] && !args[0].match(/^[+=!@/]/)) {
+        if (args[0]) {
+            if (args[0].match(/^[+=!@/]/)) {
+                client.say(channel, 'mods no pyramids that start with +=!@/')
+                return
+            }
             let num = parseInt(args[1])
-            if (Number.isNaN(num) || num < 3 || num > 9) {
+            if (Number.isNaN(num) || num < 3 || num > 5) {
                 num = 3
             }
             const nowDate = new Date()
@@ -277,7 +291,7 @@ client.on('message', function (channel, tags, message, self) {
 });
 
 async function pyramidFn(channel, msg, width) {
-    const fn = str => client.say(channel, str)
+    const fn = str => setTimeout(() => client.say(channel, str))
     for (let i = 1; i < width; i++) {
         fn(`${msg} `.repeat(i))
     }

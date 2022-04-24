@@ -51,6 +51,7 @@ let timeList = []
 
 let timeoutList = []
 
+let lastMsgSelf = false
 let pyramidEnabled = true
 let maxWidth = 5
 let pyramidCooldown = minToMs(2)
@@ -83,6 +84,7 @@ client.on('unhost', function (channel, host, i) {
 })
 
 client.on('message', function (channel, tags, message, self) {
+    lastMsgSelf = self
     if (self || !(
         message.startsWith('!') ||
         message.startsWith(process.env.TWITCH_USERNAME) ||
@@ -225,8 +227,8 @@ client.on('message', function (channel, tags, message, self) {
     if (command === '!pyramid') {
         log()
         if (args[0] && pyramidEnabled) {
-            if (args[0].match(/^[+=!@/]/)) {
-                client.say(channel, 'mods no pyramids that start with +=!@/')
+            if (args[0].match(/^[+=!@/.]/)) {
+                client.say(channel, 'mods no pyramids that start with +=!@/.')
                 return
             }
             let num = parseInt(args[1])
@@ -306,17 +308,23 @@ client.on('message', function (channel, tags, message, self) {
     if (command === '!toggle-pyramid') {
         if (!isMod)
             return
-            pyramidEnabled = !pyramidEnabled
-            client.say(channel, `@${tags['display-name']}, ${pyramidEnabled ? 'en' : 'dis'}abled !pyramid`)
+        pyramidEnabled = !pyramidEnabled
+        client.say(channel, `@${tags['display-name']}, ${pyramidEnabled ? 'en' : 'dis'}abled !pyramid`)
     }
 });
 
 async function pyramidFn(channel, msg, width) {
-    const fn = str => setTimeout(() => client.say(channel, str))
+    const fn = str => setTimeout(() => {
+            client.say(channel, str)
+    }, 10)
     for (let i = 1; i < width; i++) {
+        if (lastMsgSelf)
+            return
         fn(`${msg} `.repeat(i))
     }
     for (let i = width; i > 0; i--) {
+        if (lastMsgSelf)
+            return
         fn(`${msg} `.repeat(i))
     }
 }

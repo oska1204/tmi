@@ -307,8 +307,6 @@ function timeListFn(message) {
     const dTime = d.getTime()
     if (dTime > now + 12 * 60 * 60 * 1000)
         d.setTime(dTime + dayInMs)
-    else if (dTime < now - 12 * 60 * 60 * 1000)
-        d.setTime(dTime - dayInMs)
     const c = minuteArr.map(e => {
         const { minutes } = e
         const t = d.getTime()

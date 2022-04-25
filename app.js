@@ -179,7 +179,6 @@ client.on('message', function (channel, tags, message, self) {
             const t = nowDate.getTime() - lastPyramid[num]?.getTime() || Infinity
             const tb = nowDate.getTime() - lastPyramidGlobal?.getTime() || Infinity
             if (t > pyramidCooldown * (num - 2)) {
-                lastPyramidGlobal = nowDate
                 if (tb < pyramidCooldown) {
                     client.say(channel, `@${tags['display-name']}, pyramid on global cooldown (${Math.floor(tb / 1000)}s/${Math.round(pyramidCooldown / 1000)}s)`)
                     return
@@ -190,6 +189,7 @@ client.on('message', function (channel, tags, message, self) {
                     client.say(channel, copiumMsg)
                     return
                 }
+                lastPyramidGlobal = nowDate
                 lastPyramid[num] = nowDate
                 const text = args[0]
                 const msg = text.match(emojiRegex)?.[0] || text

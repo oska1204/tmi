@@ -22,4 +22,4 @@ I have it curently hosted on heroku, might change.
 All you need to do, if you also want to host it on heroku, is create an app, and navigate to
 https://dashboard.heroku.com/apps/<your-app>/deploy for deploy methods.
 
-Remember to add the `.env` values to https://dashboard.heroku.com/apps/<your-app>/settings config vars.
+Remember to add the `.env` values to https://dashboard.heroku.com/apps/<your-app>/settings config vars and under https://dashboard.heroku.com/apps/<your-app>/resources enable worker, and disable web.

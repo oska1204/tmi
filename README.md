@@ -13,7 +13,7 @@ You need node.js, [download](https://nodejs.org/en/)
 ## Running the app
 
 open `start.bat`,
-or in project direcory run `npm run start`
+or in project directory run `npm run start`
 
 for development run `npm run watch`, or `npm run dev` if you have a `TWITCH_CHANNEL_DEV` set
 

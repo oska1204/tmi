@@ -48,7 +48,7 @@ let pyramidCooldown = minToMs(2)
 const lastPyramid = {}
 let lastPyramidGlobal
 
-const nameRegex = new RegExp(`^@?${process.env.TWITCH_USERNAME}$`)
+const nameRegex = new RegExp(`^@?${process.env.TWITCH_USERNAME},?$`)
 const emojiRegex = emojiRegexFn();
 const dayInMs = 24 * 60 * 60 * 1000
 
@@ -71,15 +71,14 @@ client.on('unhost', function (channel, host, i) {
 
 client.on('message', function (channel, tags, message, self) {
     lastMsgSelf = self
-    if (self || !(
-        message.startsWith('!') ||
-        message.startsWith(process.env.TWITCH_USERNAME) ||
-        message.startsWith(`@${process.env.TWITCH_USERNAME}`))) return;
+    if (self ||
+        !message.startsWith('!') ||
+        !message.match(nameRegex))
+        return;
 
     const args = message.split(' ');
     const command = args.shift()
         .toLowerCase()
-        .replace(/,?$/, '');
 
     const log = () => {
         // const msgDate = new Date(parseInt(tags['tmi-sent-ts'])).toJSON()

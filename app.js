@@ -26,7 +26,7 @@ const updateData = () => {
     const startList = timeList
     let fIndex = timeList.findIndex(e => e.date.getTime() > Date.now()) - 1
     if (fIndex < 0)
-        fIndex = 0
+        fIndex = -1
     timeList = timeList.slice(fIndex)
     if (timeList.length !== startList.length) {
         console.log('Before: ', startList)
@@ -35,7 +35,7 @@ const updateData = () => {
 }
 
 const modCommandsStr = `. Mod commands: !pyramid-cd <minutes>, !max-width <width> and !toggle-pyramid`
-const commandsStr = `Commands: !now, !next, !skip, !pyramid, !commands and !mod-commands`
+const commandsStr = `Commands: !now, !next, !skip, !pyramid and !commands`
 
 let timeList = []
 

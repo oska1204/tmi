@@ -1,10 +1,7 @@
-let fs
-try {
-    fs = require('fs')
-} catch { }
 require('dotenv').config();
 const emojiRegexFn = require('emoji-regex');
 const tmi = require('tmi.js');
+const fetch = require("node-fetch");
 
 const channels = [
     process.env.TWITCH_DEV_MODE
@@ -40,13 +37,6 @@ const updateData = () => {
 const modCommandsStr = `. Mod commands: !pyramid-cd <minutes>, !max-width <width> and !toggle-pyramid`
 const commandsStr = `Commands: !now, !next, !skip, !pyramid, !commands and !mod-commands`
 
-try {
-    fs.mkdir('./data', { recursive: true }, (err) => {
-        if (err) throw err;
-    });
-} catch { }
-
-
 let timeList = []
 
 let timeoutList = []
@@ -57,10 +47,6 @@ let maxWidth = 5
 let pyramidCooldown = minToMs(2)
 const lastPyramid = {}
 let lastPyramidGlobal
-try {
-    const data = JSON.parse(fs.readFileSync('./data/timeList.json'))
-    timeList = data.map(e => ({ ...e, date: new Date(e.date) }))
-} catch (error) { console.error(error) }
 
 const nameRegex = new RegExp(`^@?${process.env.TWITCH_USERNAME}$`)
 const emojiRegex = emojiRegexFn();
@@ -110,57 +96,9 @@ client.on('message', function (channel, tags, message, self) {
         command === '!list') {
         if (!isMod)
             return
-        const listMsg = message.slice(message.indexOf(']') + 1)
-        const arr = listMsg.split(' ⏩ ')
-        const utc = message.match(/UTC\+(-?\d+)]/)?.[1] || 0
-        const a = arr.map(e => e.split(/(?=\(\d\d?:\d{2}\))/))
-        const b = a.map(e => {
-            const time = e[1]?.slice(1, -1) || '0:00'
-            const title = e[0].trim()
-            return { title, time }
-        })
         log();
-        const minuteArr = b.map((e, i, a) => {
-            if (i === 0)
-                return { ...e, minutes: 0 }
-            const p = a[i - 1]
-            const [hh, mm] = p.time.split(':').map(e => parseInt(e))
-            const [h, m] = e.time.split(':').map(e => parseInt(e))
-            let minutes = (h - hh) * 60 + m - mm
-            if (minutes < 0)
-                minutes += 24 * 60
-            return { ...e, minutes }
-        })
-        const [hStart, mStart] = minuteArr[0].time.split(':')
-            .map(e => parseInt(e))
-        const d = new Date()
-        const now = d.getTime()
-        d.setUTCHours(hStart - utc)
-        d.setUTCMinutes(mStart)
-        d.setUTCSeconds(0)
-        const dTime = d.getTime()
-        if (dTime > now + 12 * 60 * 60 * 1000)
-            d.setTime(dTime + dayInMs)
-        else if (dTime < now - 12 * 60 * 60 * 1000)
-            d.setTime(dTime - dayInMs)
-        const c = minuteArr.map(e => {
-            const { minutes } = e
-            const t = d.getTime()
-            const ms = minToMs(minutes)
-            const date = new Date(t + ms)
-            d.setTime(date)
-            return { ...e, date }
-        })
-        timeList = c
-        timeoutList.forEach(e => clearTimeout(e))
-        updateData()
-        timeoutList = timeList.map(e => setTimeout(() => {
-            client.say(hostChannel, `!settitle 🧽 ${e.title} - Baj movies`);
-        }, e.date.getTime() - Date.now()))
-        client.say(channel, `Loaded ${c.length} items.`);
-        try {
-            fs.writeFileSync('./data/timeList.json', JSON.stringify(c, null, 4))
-        } catch { }
+        timeListFn(message)
+        client.say(channel, `Loaded ${timeList.length} items.`);
     }
     if (command === '!next') {
         log()
@@ -315,8 +253,8 @@ client.on('message', function (channel, tags, message, self) {
 
 async function pyramidFn(channel, msg, width) {
     const fn = str => setTimeout(() => {
-            client.say(channel, str)
-    }, 10)
+        client.say(channel, str)
+    }, 50)
     for (let i = 1; i < width; i++) {
         if (lastMsgSelf)
             return
@@ -332,9 +270,70 @@ async function pyramidFn(channel, msg, width) {
 channels.forEach(channel => {
     setInterval(() => {
         client.say(channel, commandsStr)
-    }, 2 * 60 * 60 * 1000)
+    }, minToMs(120))
 })
 
 function minToMs(num) {
     return num * 60 * 1000
+}
+
+function timeListFn(message) {
+    const listMsg = message.slice(message.indexOf(']') + 1)
+    const arr = listMsg.split(' ⏩ ')
+    const utc = message.match(/UTC\+(-?\d+)]/)?.[1] || 0
+    const a = arr.map(e => e.split(/(?=\(\d\d?:\d{2}\))/))
+    const b = a.map(e => {
+        const time = e[1]?.slice(1, -1) || '0:00'
+        const title = e[0].trim()
+        return { title, time }
+    })
+    const minuteArr = b.map((e, i, a) => {
+        if (i === 0)
+            return { ...e, minutes: 0 }
+        const p = a[i - 1]
+        const [hh, mm] = p.time.split(':').map(e => parseInt(e))
+        const [h, m] = e.time.split(':').map(e => parseInt(e))
+        let minutes = (h - hh) * 60 + m - mm
+        if (minutes < 0)
+            minutes += 24 * 60
+        return { ...e, minutes }
+    })
+    const [hStart, mStart] = minuteArr[0].time.split(':')
+        .map(e => parseInt(e))
+    const d = new Date()
+    const now = d.getTime()
+    d.setUTCHours(hStart - utc)
+    d.setUTCMinutes(mStart)
+    d.setUTCSeconds(0)
+    const dTime = d.getTime()
+    if (dTime > now + 12 * 60 * 60 * 1000)
+        d.setTime(dTime + dayInMs)
+    else if (dTime < now - 12 * 60 * 60 * 1000)
+        d.setTime(dTime - dayInMs)
+    const c = minuteArr.map(e => {
+        const { minutes } = e
+        const t = d.getTime()
+        const ms = minToMs(minutes)
+        const date = new Date(t + ms)
+        d.setTime(date)
+        return { ...e, date }
+    })
+    timeList = c
+    timeoutList.forEach(e => clearTimeout(e))
+    updateData()
+    timeoutList = timeList.slice(1).map(e => setTimeout(() => {
+        client.say(hostChannel, `!settitle 🧽 ${e.title} - Baj movies`);
+    }, e.date.getTime() - Date.now()))
+}
+
+run()
+async function run() {
+    const { _id } = await fetch(`https://api.streamelements.com/kappa/v2/channels/${process.env.TWITCH_CHANNEL}`)
+        .then(res => res.json())
+    const data = await fetch(`https://api.streamelements.com/kappa/v2/bot/commands/${_id}/public`)
+        .then(res => res.json())
+    const timeObj = data.find(obj => obj.command === 'time')
+    const msg = timeObj.reply
+    if (msg)
+        timeListFn(msg)
 }

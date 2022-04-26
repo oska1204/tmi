@@ -29,8 +29,8 @@ const updateData = () => {
         fIndex = -1
     timeList = timeList.slice(fIndex)
     if (timeList.length !== startList.length) {
-        console.log('Before: ', startList)
-        console.log('After: ', timeList)
+        // console.log('Before: ', startList)
+        // console.log('After: ', timeList)
     }
 }
 
@@ -41,9 +41,9 @@ let timeList = []
 
 let timeoutList = []
 
-let lastMsgSelf = false
+let pyramidGen
 let pyramidEnabled = true
-let maxWidth = 5
+let maxWidth = 9
 let pyramidCooldown = minToMs(2)
 const lastPyramid = {}
 let lastPyramidGlobal
@@ -70,10 +70,18 @@ client.on('unhost', function (channel, host, i) {
 })
 
 client.on('message', function (channel, tags, message, self) {
-    lastMsgSelf = self
-    if (self ||
-        !message.startsWith('!') ||
-        !message.match(nameRegex))
+    if (pyramidGen) {
+        if (self) {
+            const fn = pyramidGen.shift()
+            if (fn)
+                fn()
+        }
+        else
+            pyramidGen = null
+    }
+    if (self || !(
+        message.startsWith('!') ||
+        message.match(nameRegex)))
         return;
 
     const args = message.split(' ');
@@ -183,16 +191,16 @@ client.on('message', function (channel, tags, message, self) {
                     return
                 }
                 if (Math.random() < .25) {
-                    const copiumMsg = `@${tags['display-name']} Better luck next time Sadeg`
-                    client.say(channel, `!band ${tags.username}`)
-                    client.say(channel, copiumMsg)
+                    const copiumMsg = `Better luck next time Sadeg`
+                    client.say(channel, `!band ${tags.username} ${copiumMsg}`)
                     return
                 }
                 lastPyramidGlobal = nowDate
                 lastPyramid[num] = nowDate
                 const text = args[0]
                 const msg = text.match(emojiRegex)?.[0] || text
-                pyramidFn(channel, msg, num)
+                pyramidGen = pyramidFn(channel, msg, num)
+                pyramidGen.shift()()
             } else {
                 client.say(channel, `@${tags['display-name']}, ${num} width pyramid on cooldown (${Math.floor(t / 1000)}s/${Math.round(pyramidCooldown * (num - 2) / 1000)}s)`)
             }
@@ -250,27 +258,34 @@ client.on('message', function (channel, tags, message, self) {
     }
 });
 
-async function pyramidFn(channel, msg, width) {
-    const fn = str => setTimeout(() => {
-        client.say(channel, str)
-    }, 50)
+function pyramidFn(channel, msg, width) {
+    const timeout = (fn, wait = 100) => new Promise(res => {
+        setTimeout(() => {
+            fn()
+            res()
+        }, wait)
+    })
+    const fn = i => client.say(channel, `${msg} `.repeat(i))
+    const arr = []
+    const action = i => {
+        const boundFn = fn.bind(this, i)
+        const timeoutBoundFn = timeout.bind(this, boundFn)
+        arr.push(timeoutBoundFn)
+    }
     for (let i = 1; i < width; i++) {
-        if (lastMsgSelf)
-            return
-        fn(`${msg} `.repeat(i))
+        action(i)
     }
     for (let i = width; i > 0; i--) {
-        if (lastMsgSelf)
-            return
-        fn(`${msg} `.repeat(i))
+        action(i)
     }
+    return arr
 }
 
-channels.forEach(channel => {
-    setInterval(() => {
-        client.say(channel, commandsStr)
-    }, minToMs(120))
-})
+// channels.forEach(channel => {
+//     setInterval(() => {
+//         client.say(channel, commandsStr)
+//     }, minToMs(120))
+// })
 
 function minToMs(num) {
     return num * 60 * 1000

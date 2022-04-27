@@ -29,8 +29,8 @@ const updateData = () => {
         fIndex = -1
     timeList = timeList.slice(fIndex)
     if (timeList.length !== startList.length) {
-        // console.log('Before: ', startList)
-        // console.log('After: ', timeList)
+        console.log('Before: ', startList.map(e => e.date))
+        console.log('After: ', timeList.map(e => e.date))
     }
 }
 
@@ -43,7 +43,7 @@ let timeoutList = []
 
 let pyramidGen
 let pyramidEnabled = true
-let maxWidth = 9
+let maxWidth = 5
 let pyramidCooldown = minToMs(2)
 const lastPyramid = {}
 let lastPyramidGlobal
@@ -335,8 +335,9 @@ function timeListFn(message) {
     timeList = c
     timeoutList.forEach(e => clearTimeout(e))
     updateData()
-    timeoutList = timeList.slice(1).map(e => setTimeout(() => {
-        client.say(hostChannel, `!settitle 🧽 ${e.title} - Baj movies`);
+    timeoutList = timeList.map(e => setTimeout(() => {
+        if (hostChannel)
+            client.say(hostChannel, `!settitle 🧽 ${e.title} - Baj movies`);
     }, e.date.getTime() - Date.now()))
 }
 

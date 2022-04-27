@@ -98,8 +98,9 @@ client.on('message', function (channel, tags, message, self) {
 
     if (((command === '!cmd' ||
         command === '!command') &&
-        args[0] === 'edit' &&
-        args[1] === 'time') ||
+        args[0] === 'edit' && (
+            args[1] === 'time' ||
+            args[1] === '!time')) ||
         command === '!list') {
         if (!isMod)
             return

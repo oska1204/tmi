@@ -18,9 +18,4 @@ Open `start.bat`, or in project directory run `npm run start`.
 
 For development run `npm run watch`, or `npm run dev` if you have a `TWITCH_CHANNEL_DEV` set.
 
-I have it curently hosted on heroku, might change.
-
-All you need to do, if you also want to host it on heroku, is create an app, and navigate to
-https://dashboard.heroku.com/apps/{{your-app}}/deploy for deploy methods.
-
-Remember to add the `.env` values to https://dashboard.heroku.com/apps/{{your-app}}/settings config vars and under https://dashboard.heroku.com/apps/{{your-app}}/resources enable worker, and disable web.
+I have it curently hosted on [glitch](https://glitch.com/).

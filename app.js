@@ -47,7 +47,7 @@ let pyramidCooldown = minToMs(10)
 const lastPyramid = {}
 let lastPyramidGlobal
 
-const nameRegex = new RegExp(`^@?${process.env.TWITCH_USERNAME},?$`)
+const nameRegex = new RegExp(`^@?${process.env.TWITCH_USERNAME},?$|^@?${process.env.TWITCH_USERNAME},? `)
 const emojiRegex = emojiRegexFn();
 const dayInMs = 24 * 60 * 60 * 1000
 
@@ -135,7 +135,7 @@ client.on('message', function (channel, tags, message, self) {
     if (command.match(nameRegex)) {
         if (args.includes('amongE')) {
             log()
-            client.say(channel, `AMOGUS haHAA I'M IRONIC haHAA I'M NOT AN AMONG US NORMIE BTW haHAA`)
+            client.say(channel, `haHAA AMOGUS haHAA IM JUST IRONIC BTW haHAA IM NOT ACTUALLY AMONG US NORMIE`)
         }
         if (args.includes('GETALIFE')) {
             log()

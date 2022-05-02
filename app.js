@@ -20,11 +20,11 @@ const client = new tmi.Client({
 
 client.connect();
 
-const secretPass = new Date().toJSON()
+let preventNextQuit = true
 
 client.on('connected', () => {
     channels.forEach(channel => {
-        client.say(channel, `!quit ${secretPass}`)
+        client.say(channel, `!quit`)
     })
 })
 
@@ -93,10 +93,11 @@ client.on('message', function (channel, tags, message, self) {
     const isMod = tags.mod ||
         tags?.badges?.broadcaster === '1'
 
-    if (self &&
-        command === '!quit' &&
-        args[0] !== secretPass) {
-        process.exit(1)
+    if (self && command === '!quit') {
+        if (preventNextQuit)
+            preventNextQuit = false
+        else
+            process.exit(1)
     }
 
     if (self)

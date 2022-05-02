@@ -141,6 +141,10 @@ client.on('message', function (channel, tags, message, self) {
             log()
             client.say(channel, `Who is ${tags['display-name']} talking to LULE`)
         }
+        if (args.includes('xqcL')) {
+            log()
+            client.say(channel, `@${tags['display-name']} xqcL`)
+        }
     }
     if (command === '!pyramid') {
         log()

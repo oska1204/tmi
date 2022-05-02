@@ -22,8 +22,10 @@ client.connect();
 
 const secretPass = new Date().toJSON()
 
-channels.forEach(channel => {
-    client.say(channel, `!quit ${secretPass}`)
+client.on('connected', () => {
+    channels.forEach(channel => {
+        client.say(channel, `!quit ${secretPass}`)
+    })
 })
 
 const double0 = str => ('0' + str).slice(-2)

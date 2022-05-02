@@ -20,6 +20,12 @@ const client = new tmi.Client({
 
 client.connect();
 
+const secretPass = new Date().toJSON()
+
+channels.forEach(channel => {
+    client.say(channel, `!quit ${secretPass}`)
+})
+
 const double0 = str => ('0' + str).slice(-2)
 
 const updateData = () => {
@@ -69,8 +75,7 @@ client.on('unhost', function (channel, host, i) {
 })
 
 client.on('message', function (channel, tags, message, self) {
-    if (self || !(
-        message.startsWith('!') ||
+    if (!(message.startsWith('!') ||
         message.match(nameRegex)))
         return;
 
@@ -85,6 +90,15 @@ client.on('message', function (channel, tags, message, self) {
 
     const isMod = tags.mod ||
         tags?.badges?.broadcaster === '1'
+
+    if (self &&
+        command === '!quit' &&
+        args[0] !== secretPass) {
+        process.exit(1)
+    }
+
+    if (self)
+        return
 
     if (((command === '!cmd' ||
         command === '!command') &&

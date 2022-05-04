@@ -88,7 +88,7 @@ client.on('message', function (channel, tags, message, self) {
         tags?.badges?.broadcaster === '1'
 
     if (command === '=eg') {
-        client.say(channel, `@${tags['display-name']} | @OkayegBOT is gone Sadeg | -9999 egs | Total egs: -99999 🥚`);
+        client.say(channel, `@${tags['display-name']} | @OkayegBOT is gone Sadeg | -9999 egs | Total egs: ${Math.floor(Math.random() * -99999)} 🥚`);
         return
     }
     if (((command === '!cmd' ||

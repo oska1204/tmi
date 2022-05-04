@@ -71,6 +71,7 @@ client.on('unhost', function (channel, host, i) {
 client.on('message', function (channel, tags, message, self) {
     if (self || !(
         message.startsWith('!') ||
+        message.startsWith('=') ||
         message.match(nameRegex)))
         return;
 
@@ -86,6 +87,10 @@ client.on('message', function (channel, tags, message, self) {
     const isMod = tags.mod ||
         tags?.badges?.broadcaster === '1'
 
+    if (command === '=eg') {
+        client.say(channel, `@${tags['display-name']} | @OkayegBOT is gone Sadeg | -9999 egs | Total egs: -99999 🥚`);
+        return
+    }
     if (((command === '!cmd' ||
         command === '!command') &&
         args[0] === 'edit' && (

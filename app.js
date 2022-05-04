@@ -102,6 +102,7 @@ client.on('message', function (channel, tags, message, self) {
         log();
         timeListFn(message)
         client.say(channel, `Loaded ${timeList.length} items.`);
+        return
     }
     if (command === '!next') {
         log()
@@ -117,6 +118,7 @@ client.on('message', function (channel, tags, message, self) {
         const calcDate = date.getTime() - Date.now()
         const timeStr = timeStrFn(calcDate)
         client.say(channel, `@${tags['display-name']}, Next: ${title} in ${timeStr}`);
+        return
     }
     if (command === '!now') {
         log()
@@ -136,20 +138,20 @@ client.on('message', function (channel, tags, message, self) {
             ? ''
             : '/' + nowTimeStrFn(calcDate2)
         client.say(channel, `@${tags['display-name']}, Now: ${title} (${startStr}${restStr})`);
+        return
     }
     if (command.match(nameRegex)) {
         if (args.includes('amongE')) {
             log()
             client.say(channel, `haHAA AMOGUS haHAA IM JUST IRONIC BTW haHAA IM NOT ACTUALLY AMONG US NORMIE`)
-        }
-        if (args.includes('GETALIFE')) {
+        } else if (args.includes('GETALIFE')) {
             log()
             client.say(channel, `Who is ${tags['display-name']} talking to LULE`)
-        }
-        if (args.includes('xqcL')) {
+        } else if (args.includes('xqcL')) {
             log()
             client.say(channel, `@${tags['display-name']} xqcL`)
         }
+        return
     }
     if (command === '!pyramid') {
         log()
@@ -188,6 +190,7 @@ client.on('message', function (channel, tags, message, self) {
                 client.say(channel, `@${tags['display-name']}, ${num} width pyramid on cooldown (${remainCooldownStr})`)
             }
         }
+        return
     }
     if (command === '!skip') {
         log()
@@ -208,6 +211,7 @@ client.on('message', function (channel, tags, message, self) {
                 s = ''
             client.say(channel, `Clueless surely ${tags['display-name']} voted to skip ${obj.title} (${obj.skipArr.length} vote${s})`)
         }
+        return
     }
     if (command === '!commands') {
         log()
@@ -222,6 +226,7 @@ client.on('message', function (channel, tags, message, self) {
             pyramidCooldown = minToMs(minutes)
             client.say(channel, `@${tags['display-name']}, set !pyramid cooldown to ${minutes} minutes`)
         }
+        return
     }
     if (command === '!max-width') {
         if (!isMod)
@@ -232,12 +237,14 @@ client.on('message', function (channel, tags, message, self) {
             maxWidth = width
             client.say(channel, `@${tags['display-name']}, set !max-width of pyramid to ${width}`)
         }
+        return
     }
     if (command === '!toggle-pyramid') {
         if (!isMod)
             return
         pyramidEnabled = !pyramidEnabled
         client.say(channel, `@${tags['display-name']}, ${pyramidEnabled ? 'en' : 'dis'}abled !pyramid`)
+        return
     }
 });
 

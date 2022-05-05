@@ -349,7 +349,7 @@ function timeStrFn(time) {
     const sStr = (h === 0 && m === 0)
         ? s + 's'
         : double0(s) + 's'
-    return `${hStr}${mStr}${sStr}`
+    return `${hStr} ${mStr} ${sStr}`
 }
 
 function nowTimeStrFn(time) {

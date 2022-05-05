@@ -349,7 +349,8 @@ function timeStrFn(time) {
     const sStr = (h === 0 && m === 0)
         ? s + 's'
         : double0(s) + 's'
-    return `${hStr} ${mStr} ${sStr}`
+    const strArr = [hStr, mStr, sStr].filter(e => e)
+    return strArr.join(' ')
 }
 
 function nowTimeStrFn(time) {

@@ -25,7 +25,9 @@ const double0 = str => ('0' + str).slice(-2)
 const updateData = () => {
     const startList = timeList
     let fIndex = timeList.findIndex(e => e.date.getTime() > Date.now()) - 1
-    if (fIndex < 0)
+    if (fIndex === -1)
+        fIndex = 0
+    if (fIndex < -1)
         fIndex = -1
     timeList = timeList.slice(fIndex)
     if (timeList.length !== startList.length) {
@@ -91,17 +93,17 @@ client.on('message', function (channel, tags, message, self) {
         client.say(channel, `@${tags['display-name']} | @OkayegBOT is gone Sadeg | -9999 egs | Total egs: ${Math.floor(Math.random() * -99999)} 🥚`);
         return
     }
-    if (((command === '!cmd' ||
-        command === '!command') &&
-        args[0] === 'edit' && (
-            args[1] === 'time' ||
-            args[1] === '!time')) ||
-        command === '!list') {
-        if (!isMod)
-            return
-        log();
-        timeListFn(message)
-        client.say(channel, `Loaded ${timeList.length} items.`);
+    const lc0 = args[0]?.toLowerCase()
+    const lc1 = args[1]?.toLowerCase()
+    if (command.match(/^!(cmd|command|list)$/)) {
+        if (lc0 === 'edit' &&
+            lc1.match(/^!?time$/)) {
+            if (!isMod)
+                return
+            log();
+            timeListFn(message)
+            client.say(channel, `Loaded ${timeList.length} items.`);
+        }
         return
     }
     if (command === '!next') {

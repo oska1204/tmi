@@ -95,15 +95,25 @@ client.on('message', function (channel, tags, message, self) {
     }
     const lc0 = args[0]?.toLowerCase()
     const lc1 = args[1]?.toLowerCase()
-    if (command.match(/^!(cmd|command|list)$/)) {
+    if (command === '!cmd' ||
+        command === '!command') {
+        const [lc0, lc1] = args.map(e => e.toLowerCase())
         if (lc0 === 'edit' &&
             lc1.match(/^!?time$/)) {
             if (!isMod)
                 return
             log();
-            timeListFn(message)
+            timeListFn(args.slice(2).join(' '))
             client.say(channel, `Loaded ${timeList.length} items.`);
         }
+        return
+    }
+    if (command === '!list') {
+        if (!isMod)
+            return
+        log();
+        timeListFn(args.join(' '))
+        client.say(channel, `Loaded ${timeList.length} items.`);
         return
     }
     if (command === '!next') {

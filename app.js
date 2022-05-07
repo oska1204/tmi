@@ -3,17 +3,25 @@ const emojiRegexFn = require('emoji-regex');
 const tmi = require('tmi.js');
 const fetch = require("node-fetch");
 
+const {
+    TWITCH_USERNAME,
+    TWITCH_OAUTH,
+    TWITCH_CHANNEL,
+    TWITCH_CHANNEL_DEV,
+    TWITCH_DEV_MODE,
+} = process.env
+
 const channels = [
-    process.env.TWITCH_DEV_MODE
-        ? process.env.TWITCH_CHANNEL_DEV
-        : process.env.TWITCH_CHANNEL
+    TWITCH_DEV_MODE
+        ? TWITCH_CHANNEL_DEV
+        : TWITCH_CHANNEL
 ]
 
 const client = new tmi.Client({
     // options: { debug: true },
     identity: {
-        username: process.env.TWITCH_USERNAME,
-        password: process.env.TWITCH_OAUTH
+        username: TWITCH_USERNAME,
+        password: TWITCH_OAUTH
     },
     channels
 });
@@ -340,7 +348,7 @@ function timeListFn(message) {
 
 run()
 async function run() {
-    const { _id } = await fetch(`https://api.streamelements.com/kappa/v2/channels/${process.env.TWITCH_CHANNEL}`)
+    const { _id } = await fetch(`https://api.streamelements.com/kappa/v2/channels/${TWITCH_CHANNEL}`)
         .then(res => res.json())
     const data = await fetch(`https://api.streamelements.com/kappa/v2/bot/commands/${_id}/public`)
         .then(res => res.json())

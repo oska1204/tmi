@@ -49,7 +49,7 @@ let pyramidCooldown = minToMs(10)
 const lastPyramid = {}
 let lastPyramidGlobal
 
-const nameRegex = new RegExp(`^@?${process.env.TWITCH_USERNAME},?$|^@?${process.env.TWITCH_USERNAME},? `)
+const nameRegex = new RegExp(`^@?${TWITCH_USERNAME},?$|^@?${TWITCH_USERNAME},? `, 'i')
 const emojiRegex = emojiRegexFn();
 const dayInMs = 24 * 60 * 60 * 1000
 

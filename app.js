@@ -189,7 +189,7 @@ client.on('message', function (channel, tags, message, self) {
                 }
                 if (Math.random() < .25) {
                     const copiumMsg = `Better luck next time Sadeg`
-                    client.say(channel, `!band ${tags.username} ${copiumMsg}`)
+                    client.say(channel, `!band ${tags['display-name']} ${copiumMsg}`)
                     return
                 }
                 lastPyramidGlobal = nowDate
@@ -213,17 +213,25 @@ client.on('message', function (channel, tags, message, self) {
         let s = 's'
         if (!obj.skipArr)
             obj.skipArr = []
-        if (obj.skipArr.includes(tags.username)) {
+        if (obj.skipArr.includes(tags['display-name'])) {
             if (obj.skipArr.length <= 1)
                 s = ''
             client.say(channel, `Clueless ${tags['display-name']} already voted to skip ${obj.title} (${obj.skipArr.length} vote${s})`)
         } else {
-            obj.skipArr.push(tags.username)
+            obj.skipArr.push(tags['display-name'])
             if (obj.skipArr.length <= 1)
                 s = ''
             client.say(channel, `Clueless surely ${tags['display-name']} voted to skip ${obj.title} (${obj.skipArr.length} vote${s})`)
         }
         return
+    }
+    if (command === '!retards') {
+        log()
+        const obj = timeList[0]
+        if (obj.skipArr)
+            client.say(channel, `@${tags['display-name']}, ${obj.skipArr.map(e => `#${e}`).join(' ')} ForsenLookingAtYou`)
+        else
+            client.say(channel, `@${tags['display-name']}, ForsenLookingAtYou`)
     }
     if (command === '!commands') {
         log()

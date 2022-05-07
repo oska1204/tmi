@@ -156,12 +156,12 @@ client.on('message', function (channel, tags, message, self) {
         if (args.includes('amongE')) {
             log()
             client.say(channel, `haHAA AMOGUS haHAA IM JUST IRONIC BTW haHAA IM NOT ACTUALLY AMONG US NORMIE`)
-        } else if (args.includes('GETALIFE')) {
-            log()
-            client.say(channel, `Who is ${tags['display-name']} talking to LULE`)
         } else if (args.includes('xqcL')) {
             log()
             client.say(channel, `@${tags['display-name']} xqcL`)
+        } else {
+            log()
+            client.say(channel, `Who is ${tags['display-name']} talking to LULE`)
         }
         return
     }

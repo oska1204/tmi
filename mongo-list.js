@@ -58,8 +58,8 @@ async function createList(list, count, date, now) {
             day: getDay(now),
         }
     })
-    try {
-        for (const obj of arr) {
+    for (const obj of arr) {
+        try {
             const { title } = obj
             const baseUrl = 'https://duckduckgo.com/?q=\\'
             const search = encodeURIComponent(`${title} site:imdb.com`)
@@ -85,9 +85,9 @@ async function createList(list, count, date, now) {
             const score = json.aggregateRating.ratingValue * 10 + '%'
             const id = json.url.match(/tt\d{7,}/)?.toString()
             Object.assign(obj, { year, mm, hhmm, score, id })
+        } catch (error) {
+            console.error(error)
         }
-    } catch (error) {
-        console.error(error)
     }
     return arr
 }

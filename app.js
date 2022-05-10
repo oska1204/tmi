@@ -2,6 +2,8 @@ require('dotenv').config();
 const emojiRegexFn = require('emoji-regex');
 const tmi = require('tmi.js');
 const fetch = require("node-fetch");
+const { mongoMsg } = require('./mongo-msg')
+const { mongoList } = require('./mongo-list')
 
 const {
     TWITCH_USERNAME,
@@ -79,7 +81,10 @@ client.on('unhost', function (channel, host, i) {
 })
 
 client.on('message', function (channel, tags, message, self) {
-    if (self || !(
+    if (self)
+        return
+    mongoMsg(channel, tags, message)
+    if (!(
         message.startsWith('!') ||
         message.startsWith('=') ||
         message.match(nameRegex)))
@@ -101,8 +106,6 @@ client.on('message', function (channel, tags, message, self) {
         client.say(channel, `@${tags['display-name']} | @OkayegBOT is gone Sadeg | -9999 egs | Total egs: ${Math.floor(Math.random() * -99999)} 🥚`);
         return
     }
-    const lc0 = args[0]?.toLowerCase()
-    const lc1 = args[1]?.toLowerCase()
     if (command === '!cmd' ||
         command === '!command') {
         const [lc0, lc1] = args.map(e => e.toLowerCase())
@@ -113,6 +116,14 @@ client.on('message', function (channel, tags, message, self) {
             log();
             timeListFn(args.slice(2).join(' '))
             client.say(channel, `Loaded ${timeList.length} items.`);
+        }
+        if (lc0 === 'edit' &&
+            lc1.match(/^!?dlc$/)) {
+            // if (!isMod)
+            //     return
+            log();
+            const say = msg => client.say(channel, msg)
+            mongoList(args.slice(2).join(' '), say)
         }
         return
     }
@@ -243,7 +254,7 @@ client.on('message', function (channel, tags, message, self) {
     }
     if (command === '!commands') {
         log()
-        client.say(channel, `@${tags['display-name']}, ${commandsStr} ${modCommandsStr}`)
+        client.say(channel, `@${tags['display-name']}, ${commandsStr}${modCommandsStr}`)
     }
     if (command === '!pyramid-cd') {
         if (!isMod)

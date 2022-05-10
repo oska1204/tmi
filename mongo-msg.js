@@ -14,12 +14,18 @@ var msgSchema = new mongoose.Schema({
 /** 3) Create and Save a Watchlist */
 var Msg = mongoose.model('msg', msgSchema);
 
+let arr = []
+
 async function mongoMsg(channel, tags, msg) {
-    await Msg.create({
+    arr.push({
         channel,
         msg,
         date: tags['tmi-sent-ts']
     })
+    if (arr.length >= 50) {
+        await Msg.create(arr)
+        arr = []
+    }
 }
 
 module.exports = { mongoMsg }

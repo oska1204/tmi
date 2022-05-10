@@ -7,7 +7,6 @@ mongoose.connect(process.env.MONGO_URI);
 /** 2) Create a 'Watchlist' Model */
 var msgSchema = new mongoose.Schema({
     channel: String,
-    tags: Object,
     msg: String,
     date: Date,
 });
@@ -18,7 +17,6 @@ var Msg = mongoose.model('msg', msgSchema);
 async function mongoMsg(channel, tags, msg) {
     await Msg.create({
         channel,
-        tags,
         msg,
         date: tags['tmi-sent-ts']
     })

@@ -82,7 +82,7 @@ async function createList(list, count, date, now) {
             const mm = h * 60 + m
             const mStr = ('0' + m).slice(-2)
             const hhmm = `${h}:${mStr}`
-            const score = json.aggregateRating.ratingValue * 10
+            const score = json.aggregateRating.ratingValue * 10 + '%'
             const id = json.url.match(/tt\d{7,}/)?.toString()
             Object.assign(obj, { year, mm, hhmm, score, id })
         }

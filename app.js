@@ -119,8 +119,8 @@ client.on('message', function (channel, tags, message, self) {
         }
         if (lc0 === 'edit' &&
             lc1.match(/^!?dlc$/)) {
-            // if (!isMod)
-            //     return
+            if (!isMod)
+                return
             log();
             const say = msg => client.say(channel, msg)
             mongoList(args.slice(2).join(' '), say)

@@ -18,6 +18,7 @@ var watchlistSchema = new mongoose.Schema({
     hhmm: String,
     id: String,
     total: Number,
+    old: String,
 });
 
 /** 3) Create and Save a Watchlist */
@@ -62,13 +63,14 @@ async function createList(list, count, date, now) {
         try {
             const { title } = obj
             const baseUrl = 'https://duckduckgo.com/?q=\\'
-            const search = encodeURIComponent(`${title} site:imdb.com`)
+            const search = encodeURIComponent(`${title} site:imdb.com/title`)
             const html = await getDocument(baseUrl + search)
             const dom = new JSDOM(html)
             const doc = dom.window.document
+            const docTitle = doc.querySelector('head title').textContent.trim()
             const elm = doc.querySelector('script[type="application/ld+json"]')
             const json = JSON.parse(elm.textContent)
-            const year = json.datePublished.replace(/-.*/, '')
+            const year = docTitle.match(/\((\d+)\) - IMDb/)?.[1]
             const [m, h = 0] = json.duration.split(/[A-Z]+/)
                 .filter(e => e)
                 .reverse()
@@ -84,7 +86,15 @@ async function createList(list, count, date, now) {
             const hhmm = `${h}:${mStr}`
             const score = json.aggregateRating.ratingValue * 10 + '%'
             const id = json.url.match(/tt\d{7,}/)?.toString()
-            Object.assign(obj, { year, mm, hhmm, score, id })
+            Object.assign(obj, {
+                year,
+                mm,
+                hhmm,
+                score,
+                id,
+                old: title,
+                title: json.name,
+            })
         } catch (error) {
             console.error(error)
         }

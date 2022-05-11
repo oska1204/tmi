@@ -70,7 +70,7 @@ async function createList(list, count, date, now) {
             const docTitle = doc.querySelector('head title').textContent.trim()
             const elm = doc.querySelector('script[type="application/ld+json"]')
             const json = JSON.parse(elm.textContent)
-            const year = docTitle.match(/\((\d+)\) - IMDb/)?.[1]
+            const year = docTitle.match(/(\d+)\) - IMDb/)?.[1]
             const [m, h = 0] = json.duration.split(/[A-Z]+/)
                 .filter(e => e)
                 .reverse()

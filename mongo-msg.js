@@ -16,15 +16,22 @@ var Msg = mongoose.model('msg', msgSchema);
 
 let arr = []
 
+const dayInMs = 24 * 60 * 60 * 1000;
+
 async function mongoMsg(channel, tags, msg) {
     arr.push({
         channel,
         msg,
         date: tags['tmi-sent-ts']
     })
-    if (arr.length >= 50) {
+    if (arr.length >= 200) {
         await Msg.create(arr)
         arr = []
+        Msg.deleteMany({
+            date: {
+                $lte: new Date(Date.now() - dayInMs * 7)
+            }
+        })
     }
 }
 

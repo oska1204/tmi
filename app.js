@@ -332,7 +332,10 @@ function timeListFn(message) {
         .map(e => parseInt(e))
     const d = new Date()
     const now = d.getTime()
-    d.setUTCHours(hStart - utc)
+    let val = hStart - utc
+    if (val < 0)
+        val += 24
+    d.setUTCHours(val)
     d.setUTCMinutes(mStart)
     d.setUTCSeconds(0)
     const dTime = d.getTime()

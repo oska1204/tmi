@@ -71,16 +71,15 @@ async function createList(list, count, date, now) {
             const elm = doc.querySelector('script[type="application/ld+json"]')
             const json = JSON.parse(elm.textContent)
             const year = docTitle.match(/(\d+)\) - IMDb/)?.[1]
-            const [m, h = 0] = json.duration.split(/[A-Z]+/)
-                .filter(e => e)
-                .reverse()
-                .map(e => {
-                    const num = parseInt(e)
-                    if (Number.isNaN(num))
-                        return 0
-                    else
-                        return num
-                })
+            const th = json.duration.match(/(\d+)H/)?.[1]
+            const tm = json.duration.match(/(\d+)M/)?.[1]
+            const [h, m] = [th, tm].map(e => {
+                const num = parseInt(e)
+                if (Number.isNaN(num))
+                    return 0
+                else
+                    return num
+            })
             const mm = h * 60 + m
             const mStr = ('0' + m).slice(-2)
             const hhmm = `${h}:${mStr}`
@@ -141,4 +140,7 @@ async function getDocument(url) {
     return doc.documentElement.innerHTML
 }
 
-module.exports = { mongoList }
+module.exports = {
+    mongoList,
+    createList
+}

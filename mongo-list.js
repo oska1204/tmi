@@ -64,7 +64,7 @@ async function createList(list, count, date, now) {
         try {
             const { title } = obj
             const baseUrl = 'https://duckduckgo.com/?q=\\'
-            const search = encodeURIComponent(`${title} site:imdb.com/title`)
+            const search = encodeURIComponent(`${title} movie site:imdb.com/title`)
             const html = await getDocument(baseUrl + search)
             const dom = new JSDOM(html)
             const doc = dom.window.document

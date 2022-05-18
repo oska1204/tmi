@@ -47,7 +47,7 @@ const updateData = () => {
 }
 
 const modCommandsStr = `. Mod commands: !pyramid-cd <minutes>, !max-width <width> and !toggle-pyramid`
-const commandsStr = `Commands: !now, !next, !skip, !pyramid and !commands`
+const commandsStr = `Commands: !now !next !skip !pyramid !skipped !commands`
 
 let timeList = []
 
@@ -220,6 +220,8 @@ client.on('message', function (channel, tags, message, self) {
                 const remainCooldownStr = timeStrFn(pyramidCooldown * (num - 2) - t)
                 client.say(channel, `@${tags['display-name']}, ${num} width pyramid on cooldown (${remainCooldownStr})`)
             }
+        } else if (pyramidEnabled) {
+            client.say(channel, `@${tags['display-name']}, !pyramid <word> <?width>`)
         }
         return
     }
@@ -244,7 +246,8 @@ client.on('message', function (channel, tags, message, self) {
         }
         return
     }
-    if (command === '!retards') {
+    if (command === '!retards' ||
+        command === '!skipped') {
         log()
         const obj = timeList[0]
         if (obj.skipArr)
@@ -333,8 +336,6 @@ function timeListFn(message) {
     const d = new Date()
     const now = d.getTime()
     let val = hStart - utc
-    if (val < 0)
-        val += 24
     d.setUTCHours(val)
     d.setUTCMinutes(mStart)
     d.setUTCSeconds(0)

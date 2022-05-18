@@ -37,7 +37,8 @@ async function mongoList(msg, say) {
         now.getUTCFullYear()
     ].join('/')
     const dbList = await Watchlist.find({ date }).sort({ total: -1 })
-    if (dbList.length <= list.length) {
+    if (dbList.length <= list.length &&
+        list.length !== 0) {
         say('Generating watchlist...')
         await Watchlist.deleteMany({ date })
         const count = await Watchlist.count()

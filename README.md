@@ -20,10 +20,4 @@ For development run `npm run watch`, or `npm run dev` if you have a `TWITCH_CHAN
 
 ## Hosting
 
-I have it curently hosted on [wayscript](https://wayscript.com/).
-
-If you want to host it on wayscript. The files you need to upload are `app.js`, `package.json` and `.env`.
-
-After that "add trigger" and choose "deploy". And under "command to run", past `npm i && npm run start`. After that deploy.
-
-This is the [video](https://www.youtube.com/watch?v=v6opIdJYGnI) i followed.
+I have it curently hosted on heroku.

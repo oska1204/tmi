@@ -284,7 +284,7 @@ client.on('message', function (channel, tags, message, self) {
         } else if (allArgs.includes('xqcL')) {
             log()
             client.say(channel, `@${tags['display-name']} xqcL`)
-        } else {
+        } else if (allArgs.includes('GETALIFE')){
             log()
             client.say(channel, `Who is ${tags['display-name']} talking to LULE`)
         }

@@ -59,7 +59,8 @@ let pyramidCooldown = minToMs(10)
 const lastPyramid = {}
 let lastPyramidGlobal
 
-const nameRegex = new RegExp(`^@?${TWITCH_USERNAME},?$|^@?${TWITCH_USERNAME},? `, 'i')
+const nameStr = `@?${TWITCH_USERNAME},?`
+const nameRegex = new RegExp(`^${nameStr}$| ${nameStr}$|^${nameStr} | ${nameStr} `, 'i')
 const emojiRegex = emojiRegexFn();
 const dayInMs = 24 * 60 * 60 * 1000
 
@@ -171,19 +172,6 @@ client.on('message', function (channel, tags, message, self) {
         client.say(channel, `@${tags['display-name']}, Now: ${title} (${startStr}${restStr})`);
         return
     }
-    if (command.match(nameRegex)) {
-        if (args.includes('amongE')) {
-            log()
-            client.say(channel, `haHAA AMOGUS haHAA IM JUST IRONIC BTW haHAA IM NOT ACTUALLY AMONG US NORMIE`)
-        } else if (args.includes('xqcL')) {
-            log()
-            client.say(channel, `@${tags['display-name']} xqcL`)
-        } else {
-            log()
-            client.say(channel, `Who is ${tags['display-name']} talking to LULE`)
-        }
-        return
-    }
     if (command === '!pyramid') {
         log()
         if (args[0] && pyramidEnabled) {
@@ -286,6 +274,20 @@ client.on('message', function (channel, tags, message, self) {
             return
         pyramidEnabled = !pyramidEnabled
         client.say(channel, `@${tags['display-name']}, ${pyramidEnabled ? 'en' : 'dis'}abled !pyramid`)
+        return
+    }
+    if (message.match(nameRegex)) {
+        const allArgs = message.split(' ')
+        if (allArgs.includes('amongE')) {
+            log()
+            client.say(channel, `haHAA AMOGUS haHAA IM JUST IRONIC BTW haHAA IM NOT ACTUALLY AMONG US NORMIE`)
+        } else if (allArgs.includes('xqcL')) {
+            log()
+            client.say(channel, `@${tags['display-name']} xqcL`)
+        } else {
+            log()
+            client.say(channel, `Who is ${tags['display-name']} talking to LULE`)
+        }
         return
     }
 });

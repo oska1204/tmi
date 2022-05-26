@@ -139,6 +139,8 @@ async function getDocument(url) {
         let c = b.replace(/^\s*?url=/i, '')
         if (c[0] === '/')
             c = urlO.origin + c
+        if (!c.match(/\/title\/tt\d{7,}\/?$/))
+            c = c.replace(/(?<=\/title\/tt\d{7,}\/?).*/, '')
         return await getDocument(c)
     }
     return doc.documentElement.innerHTML

@@ -308,6 +308,10 @@ function pyramidFn(channel, msg, width) {
 //     }, minToMs(120))
 // })
 
+function hrsToMs(num) {
+    return num * 60 * 60 * 1000
+}
+
 function minToMs(num) {
     return num * 60 * 1000
 }
@@ -315,7 +319,7 @@ function minToMs(num) {
 function timeListFn(message) {
     const listMsg = message.slice(message.indexOf(']') + 1)
     const arr = listMsg.split(' ⏩ ')
-    const utc = message.match(/UTC\+(-?\d+)]/)?.[1] || 0
+    const utc = ~~parseInt(message.match(/UTC\+(-?\d+)]/)?.[1]) || 0
     const a = arr.map(e => e.split(/(?=\(\d\d?:\d{2}\))/))
     const b = a.map(e => {
         const time = e[1]?.slice(1, -1) || '0:00'
@@ -336,16 +340,16 @@ function timeListFn(message) {
     const [hStart, mStart] = minuteArr[0].time.split(':')
         .map(e => parseInt(e))
     const d = new Date()
-    const now = d.getTime()
-    let val = hStart - utc
-    d.setUTCHours(val)
+    const now = d.getTime() - hrsToMs(utc)
+    d.setUTCHours(hStart)
     d.setUTCMinutes(mStart)
     d.setUTCSeconds(0)
+    d.setTime(d.getTime() - hrsToMs(utc))
     const dTime = d.getTime()
-    if (dTime > now + 12 * 60 * 60 * 1000)
-        d.setTime(dTime + dayInMs)
-    else if (dTime < now - 21 * 60 * 60 * 1000)
+    if (dTime > now + hrsToMs(6))
         d.setTime(dTime - dayInMs)
+    else if (dTime < now - hrsToMs(18))
+        d.setTime(dTime + dayInMs)
     const c = minuteArr.map(e => {
         const { minutes } = e
         const t = d.getTime()

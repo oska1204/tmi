@@ -1,4 +1,5 @@
-.env
-data
-node_modules
-package-lock.json
+/.env
+/data
+/node_modules
+/package-lock.json
+/t

@@ -91,7 +91,7 @@ client.on('message', function (channel, tags, message, self) {
         message.match(nameRegex)))
         return;
 
-    const args = message.split(' ');
+    const args = message.split(/ +/).filter(e => e);
     const command = args.shift()
         .toLowerCase()
 
@@ -174,7 +174,7 @@ client.on('message', function (channel, tags, message, self) {
     }
     if (command === '!pyramid') {
         log()
-        if (args[0] && pyramidEnabled) {
+        if (args.length && pyramidEnabled) {
             if (args[0].match(/^[+=!@/.]/)) {
                 client.say(channel, 'mods no pyramids that start with +=!@/.')
                 return

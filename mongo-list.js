@@ -180,7 +180,7 @@ async function getDocument(url) {
 }
 
 function getEpisode(search, season, episode) {
-    const str = encodeURIComponent('Obi-Wan Kenobi')
+    const str = encodeURIComponent(search)
     return fetch(`https://www.omdbapi.com/?apikey=80bf610a&t=${str}&type=series&season=${season}&episode=${episode}`)
         .then(e => e.json())
 }

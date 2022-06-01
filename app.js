@@ -3,7 +3,8 @@ const emojiRegexFn = require('emoji-regex');
 const tmi = require('tmi.js');
 const fetch = require("node-fetch");
 const { mongoMsg } = require('./mongo-msg')
-const { mongoList } = require('./mongo-list')
+const { mongoList } = require('./mongo-list');
+const { banNewUsers } = require('./banNewUsers');
 
 const {
     TWITCH_USERNAME,
@@ -85,13 +86,17 @@ client.on('message', function (channel, tags, message, self) {
     if (self)
         return
     mongoMsg(channel, tags, message)
+    if (tags.username === 'streamelements') {
+        const say = msg => client.say(channel, msg)
+        banNewUsers(message, say)
+    }
     if (!(
         message.startsWith('!') ||
         message.startsWith('=') ||
         message.match(nameRegex)))
         return;
 
-    const args = message.split(/ +/).filter(e => e);
+    const args = message.split(' ')
     const command = args.shift()
         .toLowerCase()
 
@@ -284,7 +289,7 @@ client.on('message', function (channel, tags, message, self) {
         } else if (allArgs.includes('xqcL')) {
             log()
             client.say(channel, `@${tags['display-name']} xqcL`)
-        } else if (allArgs.includes('GETALIFE')){
+        } else if (allArgs.includes('GETALIFE')) {
             log()
             client.say(channel, `Who is ${tags['display-name']} talking to LULE`)
         }

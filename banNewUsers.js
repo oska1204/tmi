@@ -4,11 +4,7 @@ function hrsToMs(num) {
     return num * 60 * 60 * 1000
 }
 
-async function banNewUsers(message, say) {
-    const match = message.match(/^Thank you for following (\w+)/)
-    if (!match)
-        return
-    const { 1: user } = match
+async function banNewUsers(user, say) {
     const res = await fetch(`https://api.ivr.fi/v2/twitch/user?login=${user}`)
         .then(e => e.json())
     res.forEach(obj => {

@@ -59,6 +59,7 @@ let maxWidth = 5
 let pyramidCooldown = minToMs(10)
 const lastPyramid = {}
 let lastPyramidGlobal
+const newUserArr = []
 
 const nameStr = `@?${TWITCH_USERNAME},?`
 const nameRegex = new RegExp(`^${nameStr}$| ${nameStr}$|^${nameStr} | ${nameStr} `, 'i')
@@ -86,9 +87,10 @@ client.on('message', function (channel, tags, message, self) {
     if (self)
         return
     mongoMsg(channel, tags, message)
-    if (tags.username === 'streamelements') {
+    if (!newUserArr.includes(tags.username)) {
+        newUserArr.push(tags.username)
         const say = msg => client.say(channel, msg)
-        banNewUsers(message, say)
+        banNewUsers(tags.username, say)
     }
     if (!(
         message.startsWith('!') ||

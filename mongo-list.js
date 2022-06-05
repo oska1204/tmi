@@ -81,14 +81,7 @@ async function searchFn(obj) {
     if (imdbID) {
         const baseUrl = 'https://www.imdb.com/title/';
         url = baseUrl + imdbID;
-        const html = await getDocument(baseUrl + seriesID);
-        const dom = new JSDOM(html);
-        const doc = dom.window.document;
-        const elm = doc.querySelector('script[type="application/ld+json"]');
-        const json = JSON.parse(elm.textContent);
-        const t = doc.createElement('template');
-        t.innerHTML = json.name;
-        seriesTitle = t.content.textContent;
+        seriesTitle = await getTitle(seriesID);
         seriesTitle += title.match(/ s\d{2}e\d{2,}$/i).toString().toUpperCase()
     } else {
         const baseUrl = 'https://duckduckgo.com/?q=\\';
@@ -101,9 +94,6 @@ async function searchFn(obj) {
     const docTitle = doc.querySelector('head title').textContent.trim();
     const elm = doc.querySelector('script[type="application/ld+json"]');
     const json = JSON.parse(elm.textContent);
-    const t = doc.createElement('template');
-    t.innerHTML = json.name;
-    const titleText = t.content.textContent;
     const year = docTitle.match(/(\d+)\) - IMDb/)?.[1];
     const th = json.duration?.match(/(\d+)H/)?.[1];
     const tm = json.duration?.match(/(\d+)M/)?.[1];
@@ -127,6 +117,7 @@ async function searchFn(obj) {
     if (ratingValue)
         score = ratingValue * 10 + '%';
     const id = json.url.match(/tt\d{7,}/)?.toString();
+    const titleText =  await getTitle(id);
     Object.assign(obj, {
         year,
         mm,
@@ -191,6 +182,12 @@ function matchEpisode(str) {
         const [, t, s, e] = match
         return getEpisode(t.trim(), s, e)
     }
+}
+
+async function getTitle(id) {
+    const json = await fetch(`https://www.omdbapi.com/?apikey=80bf610a&i=${id}`)
+        .then(e => e.json())
+    return json.Title
 }
 
 module.exports = {

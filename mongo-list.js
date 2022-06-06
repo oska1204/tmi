@@ -26,6 +26,13 @@ var Watchlist = mongoose.model('watchlist', watchlistSchema);
 
 let currentId
 
+const d0 = str => {
+    str = str.toString()
+    if (str.length === 1)
+        return '0' + str
+    return str
+}
+
 async function mongoList(msg, say = console.log) {
     const currentIdTemp = Date.now()
     currentId = currentIdTemp
@@ -80,7 +87,12 @@ async function createList(list, count, date, now) {
 
 async function searchFn(obj) {
     const { title } = obj;
-    const seriesJson = await matchEpisode(title.trim()) || {};
+    const matchEpisodeObj = matchEpisode(title.trim());
+    let seriesJson
+    const { t, s, e } = matchEpisodeObj || {};
+    if (matchEpisodeObj) {
+        seriesJson = await getEpisode(t, s, e) || {};
+    }
     const { imdbID, seriesID } = seriesJson
     let url;
     let seriesTitle
@@ -88,7 +100,7 @@ async function searchFn(obj) {
         const baseUrl = 'https://www.imdb.com/title/';
         url = baseUrl + imdbID;
         seriesTitle = await getTitle(seriesID);
-        seriesTitle += title.match(/ s\d{2}e\d{2,}$/i).toString().toUpperCase()
+        seriesTitle += ` S${d0(s)}E${d0(e)}`
     } else {
         const baseUrl = 'https://duckduckgo.com/?q=\\';
         const search = encodeURIComponent(`${title} movie site:imdb.com/title`);
@@ -123,7 +135,7 @@ async function searchFn(obj) {
     if (ratingValue)
         score = ratingValue * 10 + '%';
     const id = json.url.match(/tt\d{7,}/)?.toString();
-    const titleText =  await getTitle(id);
+    const titleText = await getTitle(id);
     Object.assign(obj, {
         year,
         mm,
@@ -183,18 +195,22 @@ function getEpisode(search, season, episode) {
 }
 
 function matchEpisode(str) {
-    const match = str.match(/(.+)s(\d{2})e(\d{2,})$/i)
+    let match = str.match(/(?<t>.+)s(?<s>\d{2})e(?<e>\d{2,})$/i)
+    if (!match)
+        match = str.match(/(?<t>.+)episode (?<e>\d+)/i)
     if (match) {
-        const [, t, s, e] = match
-        return getEpisode(t.trim(), s, e)
+        const { t, s = 1, e } = match.groups
+        return { t: t.trim(), s, e }
     }
 }
 
 async function getTitle(id) {
+    id = id.replace(/t+/, 'tt')
     const json = await fetch(`https://www.omdbapi.com/?apikey=80bf610a&i=${id}`)
         .then(e => e.json())
     return json.Title
 }
+
 
 module.exports = {
     mongoList,

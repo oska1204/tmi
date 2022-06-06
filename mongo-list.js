@@ -24,7 +24,11 @@ var watchlistSchema = new mongoose.Schema({
 /** 3) Create and Save a Watchlist */
 var Watchlist = mongoose.model('watchlist', watchlistSchema);
 
+let currentId
+
 async function mongoList(msg, say = console.log) {
+    const currentIdTemp = Date.now()
+    currentId = currentIdTemp
     const list = msg.split('⏩')
         .map(e => e.trim())
     list.pop()
@@ -43,9 +47,11 @@ async function mongoList(msg, say = console.log) {
         await Watchlist.deleteMany({ date })
         const count = await Watchlist.count()
         const newList = await createList(list, count, date, now)
-        await Watchlist.create(newList)
-        say('Updating watchlist...')
-        fetch(process.env.NETLIFY_BUILD_URI, { method: 'post' })
+        if (currentId === currentIdTemp) {
+            await Watchlist.create(newList)
+            say('Updating watchlist...')
+            fetch(process.env.NETLIFY_BUILD_URI, { method: 'post' })
+        }
     }
     console.log(await Watchlist.count())
 }

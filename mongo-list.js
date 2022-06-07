@@ -88,7 +88,7 @@ async function createList(list, count, date, now) {
 async function searchFn(obj) {
     const { title } = obj;
     const matchEpisodeObj = matchEpisode(title.trim());
-    let seriesJson
+    let seriesJson = {}
     const { t, s, e } = matchEpisodeObj || {};
     if (matchEpisodeObj) {
         seriesJson = await getEpisode(t, s, e) || {};

@@ -1,6 +1,7 @@
 require('dotenv').config()
 const fetch = require("node-fetch");
 const { JSDOM } = require('jsdom');
+const fs = require('fs')
 
 /** 1) Install & Set up mongoose */
 const mongoose = require('mongoose');
@@ -166,7 +167,7 @@ function getDay(now) {
     }
 }
 
-async function getDocument(url) {
+async function getDocument(url, isNo) {
     let urlO
     const html = await fetch(url).then(e => {
         urlO = new URL(e.url)
@@ -181,17 +182,40 @@ async function getDocument(url) {
         let c = b.replace(/^\s*?url=/i, '')
         if (c[0] === '/')
             c = urlO.origin + c
-        if (!c.match(/\/title\/tt\d{7,}\/?$/))
+        if (!c.match(/\/title\/tt\d{7,}\/?$/) && !isNo)
             c = c.replace(/(?<=\/title\/tt\d{7,}\/?).*/, '')
         return await getDocument(c)
     }
     return doc.documentElement.innerHTML
 }
 
-function getEpisode(search, season, episode) {
+async function getEpisode(search, season, episode) {
     const str = encodeURIComponent(search)
-    return fetch(`https://www.omdbapi.com/?apikey=80bf610a&t=${str}&type=series&season=${season}&episode=${episode}`)
+    let id, sid
+    const j = await fetch(`https://www.omdbapi.com/?apikey=80bf610a&t=${str}&type=series&season=${season}&episode=${episode}`)
         .then(e => e.json())
+    if (j.Response === 'False') {
+        const baseUrl = 'https://duckduckgo.com/?q=\\';
+        const s = encodeURIComponent(`${search} series site:imdb.com/title`);
+        const u = baseUrl + s;
+        const h = await getDocument(u)
+        const dom2 = new JSDOM(h);
+        const doc2 = dom2.window.document;
+        const elm = doc2.querySelector('script[type="application/ld+json"]');
+        const json = JSON.parse(elm.textContent);
+        sid = json.url.match(/tt\d{7,}/)?.toString();
+        const html = await getDocument(`https://www.imdb.com/title/${sid}/episodes?season=${season}`, true)
+        const dom = new JSDOM(html);
+        const doc = dom.window.document;
+        id = doc.querySelector(`[itemprop="episodeNumber"][content="${episode}"] ~ strong a`)
+            .href
+            .match(/tt\d+/)
+            .toString()
+    } else {
+        id = j.imdbID
+        sid = j.seriesID
+    }
+    return { imdbID: id, seriesID: sid }
 }
 
 function matchEpisode(str) {

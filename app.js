@@ -323,9 +323,9 @@ function minToMs(num) {
 
 function timeListFn(message) {
     const listMsg = message.slice(message.indexOf(']') + 1)
-    const arr = listMsg.split(' ⏩ ')
+    const arr = listMsg.split('⏩')
     const utc = ~~parseInt(message.match(/UTC\+(-?\d+)]/)?.[1]) || 0
-    const a = arr.map(e => e.split(/(?=\(\d\d?:\d{2}\))/))
+    const a = arr.map(e => e.split(/(?=\(\d{1,2}:\d{2}\))/))
     const b = a.map(e => {
         const time = e[1]?.slice(1, -1) || '0:00'
         const title = e[0].trim()

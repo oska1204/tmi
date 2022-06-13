@@ -41,7 +41,7 @@ async function mongoList(msg, say = console.log) {
         .map(e => e.trim())
     list.pop()
     if (typeof list[0] === 'string')
-        list[0] = list[0].replace(/[A-Z]{3} - /, '')
+        list[0] = list[0].replace(/^[A-Z]{3} - /, '')
     const now = new Date
     const date = [
         now.getUTCDate(),

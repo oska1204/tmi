@@ -80,7 +80,7 @@ async function createList(list, count, date, now) {
         } catch (error) {
             console.error(error)
         }
-        await new Promise(res => setTimeout(res, 10000))
+        await wait()
     }
 
     return arr
@@ -190,31 +190,24 @@ async function getDocument(url, isNo) {
 }
 
 async function getEpisode(search, season, episode) {
-    const str = encodeURIComponent(search)
     let id, sid
-    const j = await fetch(`https://www.omdbapi.com/?apikey=80bf610a&t=${str}&type=series&season=${season}&episode=${episode}`)
-        .then(e => e.json())
-    if (j.Response === 'False') {
-        const baseUrl = 'https://duckduckgo.com/?q=\\';
-        const s = encodeURIComponent(`${search} series site:imdb.com/title`);
-        const u = baseUrl + s;
-        const h = await getDocument(u)
-        const dom2 = new JSDOM(h);
-        const doc2 = dom2.window.document;
-        const elm = doc2.querySelector('script[type="application/ld+json"]');
-        const json = JSON.parse(elm.textContent);
-        sid = json.url.match(/tt\d{7,}/)?.toString();
-        const html = await getDocument(`https://www.imdb.com/title/${sid}/episodes?season=${season}`, true)
-        const dom = new JSDOM(html);
-        const doc = dom.window.document;
-        id = doc.querySelector(`[itemprop="episodeNumber"][content="${episode}"] ~ strong a`)
-            .href
-            .match(/tt\d+/)
-            .toString()
-    } else {
-        id = j.imdbID
-        sid = j.seriesID
-    }
+    const baseUrl = 'https://duckduckgo.com/?q=\\';
+    const s = encodeURIComponent(`${search} series site:imdb.com/title`);
+    const u = baseUrl + s;
+    const h = await getDocument(u)
+    const dom2 = new JSDOM(h);
+    const doc2 = dom2.window.document;
+    const elm = doc2.querySelector('script[type="application/ld+json"]');
+    const json = JSON.parse(elm.textContent);
+    sid = json.url.match(/tt\d{7,}/)?.toString();
+    const html = await getDocument(`https://www.imdb.com/title/${sid}/episodes?season=${season}`, true)
+    const dom = new JSDOM(html);
+    const doc = dom.window.document;
+    id = doc.querySelector(`[itemprop="episodeNumber"][content="${episode}"] ~ strong a`)
+        .href
+        .match(/tt\d+/)
+        .toString()
+    await wait()
     return { imdbID: id, seriesID: sid }
 }
 
@@ -224,7 +217,11 @@ function matchEpisode(str) {
         match = str.match(/(?<t>.+)episode (?<e>\d+)/i)
     if (match) {
         const { t, s = 1, e } = match.groups
-        return { t: t.trim(), s, e }
+        return {
+            t: t.trim(),
+            s: parseInt(s),
+            e: parseInt(e),
+        }
     }
 }
 
@@ -235,6 +232,9 @@ async function getTitle(id) {
     return json.Title
 }
 
+function wait(seconds = 10) {
+    return new Promise(res => setTimeout(res, seconds * 1000))
+}
 
 module.exports = {
     mongoList,

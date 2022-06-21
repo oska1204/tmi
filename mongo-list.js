@@ -54,7 +54,13 @@ async function mongoList(msg, say = console.log) {
         say('Generating watchlist...')
         await Watchlist.deleteMany({ date })
         const count = await Watchlist.count()
-        const newList = await createList(list, count, date, now)
+        const newList = await createList(
+            list,
+            count,
+            date,
+            now,
+            currentIdTemp,
+        )
         if (currentId === currentIdTemp) {
             await Watchlist.create(newList)
             say('Updating watchlist...')
@@ -64,7 +70,7 @@ async function mongoList(msg, say = console.log) {
     console.log(await Watchlist.count())
 }
 
-async function createList(list, count, date, now) {
+async function createList(list, count, date, now, currentIdTemp) {
     const arr = list.map((title, i) => {
         return {
             title,
@@ -75,12 +81,14 @@ async function createList(list, count, date, now) {
         }
     })
     for (const obj of arr) {
+        if (currentId !== currentIdTemp)
+            break
+        await wait()
         try {
             await searchFn(obj);
         } catch (error) {
             console.error(error)
         }
-        await wait()
     }
 
     return arr

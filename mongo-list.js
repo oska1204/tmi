@@ -144,7 +144,7 @@ async function searchFn(obj) {
     if (ratingValue)
         score = ratingValue * 10 + '%';
     const id = json.url.match(/tt\d{7,}/)?.toString();
-    const titleText = await getTitle(id);
+    const titleText = await getTitle(id) || json.alternateName || json.name;
     Object.assign(obj, {
         year,
         mm,

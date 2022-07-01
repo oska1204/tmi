@@ -39,7 +39,10 @@ async function mongoList(msg, say = console.log) {
     currentId = currentIdTemp
     const list = msg.split('⏩')
         .map(e => e.trim())
-    list.pop()
+    if (list.length === 1)
+        return
+    if (list[list.length - 1].trim().match(/^cartoons$/i))
+        list.pop()
     if (typeof list[0] === 'string')
         list[0] = list[0].replace(/^[A-Z]{3} - /, '')
     const now = new Date

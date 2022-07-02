@@ -243,7 +243,7 @@ async function getTitle(id) {
     return json.Title
 }
 
-function wait(seconds = 10) {
+function wait(seconds = 12) {
     return new Promise(res => setTimeout(res, seconds * 1000))
 }
 
